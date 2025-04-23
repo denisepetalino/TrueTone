@@ -11,4 +11,4 @@ If you’re curious about personal colour analysis or frustrated with stylist ap
 
 Feel free to explore the code, suggest improvements or just enjoy the app :)
 
-- Denise <3
+Denise <3
