@@ -1,10 +1,12 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import Navbar from '../components/Navbar';
 
 function QuizScreen(props) {
     return (
         <View style={styles.container}>
             <Text style={styles.text}> Quiz Screen </Text>
+        <Navbar/>
         </View>
     );
 }
