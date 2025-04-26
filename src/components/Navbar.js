@@ -25,11 +25,12 @@ const styles = StyleSheet.create({
         justifyContent: 'space-around',
         width: '100%',
         backgroundColor: '#DB7C87',
-        paddingVertical: 20,
+        paddingVertical: 10,
+        height: '12%',
     },
     navIcon: {
-        width: 50,
-        height: 50,
+        width: 60,
+        height: 60,
     },
 });
 

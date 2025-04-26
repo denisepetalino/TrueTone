@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Navbar from '../components/navbar';
+import Navbar from '../components/Navbar';
 
 const AnalyseMeScreen = () => {
   const navigation = useNavigation();
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingVertical: 50,
     marginTop:20,
-    marginBottom: 129,
+    marginBottom: 60,
   },
   star: {
     width: 160,

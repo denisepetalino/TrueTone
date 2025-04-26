@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Navbar from '../components/navbar';
+import Navbar from '../components/Navbar';
 
 const UploadScreen = () => {
   const navigation = useNavigation();
@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingVertical: 50,
     marginTop:40,
-    marginBottom: 187,
+    marginBottom: 12,
   },
   headingtext: {
     color: '#DB7C87',
