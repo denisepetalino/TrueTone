@@ -7,11 +7,15 @@ const Navbar = () => {
 
     return(
         <View style={styles.navbar}>
-            <Image source={require('../assets/images/profileicon.png')} style={styles.navIcon} />
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                <Image source={require('../assets/images/profileicon.png')} style={styles.navIcon} />
+            </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('Upload')}>
                 <Image source={require('../assets/images/uploadicon.png')} style={styles.navIcon} />
             </TouchableOpacity>
-            <Image source={require('../assets/images/wardrobeicon.png')} style={styles.navIcon} />
+            <TouchableOpacity onPress={() => navigation.navigate('Wardrobe')}>
+                <Image source={require('../assets/images/wardrobeicon.png')} style={styles.navIcon} />
+            </TouchableOpacity>
             <TouchableOpacity onPress={() => navigation.navigate('AnalyseMe')}>
                 <Image source={require('../assets/images/quizicon.png')} style={styles.navIcon} />
             </TouchableOpacity>
