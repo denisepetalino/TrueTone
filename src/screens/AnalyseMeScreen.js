@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import Navbar from '../components/navbar';
 
 const AnalyseMeScreen = () => {
   const navigation = useNavigation();
@@ -18,16 +19,7 @@ const AnalyseMeScreen = () => {
         </TouchableOpacity>
         <Text style={styles.subtext}>take this quick and easy quiz to discover YOUR personal seasonal colour analysis</Text>
       </View>
-      <View style={styles.navbar}>
-        <Image source={require('../assets/images/profileicon.png')} style={styles.navIcon} />
-        <TouchableOpacity onPress={() => navigation.navigate('Upload')}>
-            <Image source={require('../assets/images/uploadicon.png')} style={styles.navIcon} />
-        </TouchableOpacity>
-        <Image source={require('../assets/images/wardrobeicon.png')} style={styles.navIcon} />
-        <TouchableOpacity onPress={() => navigation.navigate('AnalyseMe')}>
-            <Image source={require('../assets/images/quizicon.png')} style={styles.navIcon} />
-        </TouchableOpacity>
-      </View>
+      <Navbar/>
     </View>
   );
 };
@@ -42,9 +34,9 @@ const styles = StyleSheet.create({
     paddingBottom:20,
   },
   logo: {
-    width: 480,
-    height: 180,
-    resizeMode: 'cover',
+    width: 400,
+    height: 140,
+    resizeMode: 'contain',
   },
   box: {
     borderWidth: 6,
@@ -55,6 +47,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingVertical: 50,
     marginTop:20,
+    marginBottom: 129,
   },
   star: {
     width: 160,
@@ -78,18 +71,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     paddingHorizontal: 50,
     paddingBottom: 30,
-  },
-  navbar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    backgroundColor: '#DB7C87',
-    paddingVertical: 20,
-    marginTop:79,
-  },
-  navIcon: {
-    width: 50,
-    height: 50,
   },
 });
 

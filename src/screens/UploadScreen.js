@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import Navbar from '../components/navbar';
 
 const UploadScreen = () => {
   const navigation = useNavigation();
@@ -19,16 +20,7 @@ const UploadScreen = () => {
             5. ensure the item fills the majority of the frame {'\n'}
         </Text>
       </View>
-      <View style={styles.navbar}>
-        <Image source={require('../assets/images/profileicon.png')} style={styles.navIcon} />
-        <TouchableOpacity onPress={() => navigation.navigate('Upload')}>
-            <Image source={require('../assets/images/uploadicon.png')} style={styles.navIcon} />
-        </TouchableOpacity>
-        <Image source={require('../assets/images/wardrobeicon.png')} style={styles.navIcon} />
-        <TouchableOpacity onPress={() => navigation.navigate('AnalyseMe')}>
-            <Image source={require('../assets/images/quizicon.png')} style={styles.navIcon} />
-        </TouchableOpacity>
-      </View>
+      <Navbar/>
     </View>
   );
 };
@@ -43,9 +35,9 @@ const styles = StyleSheet.create({
     paddingBottom:20,
   },
   logo: {
-    width: 480,
-    height: 180,
-    resizeMode: 'cover',
+    width: 400,
+    height: 140,
+    resizeMode: 'contain',
   },
   box: {
     borderWidth: 6,
@@ -56,6 +48,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingVertical: 50,
     marginTop:40,
+    marginBottom: 187,
   },
   headingtext: {
     color: '#DB7C87',
@@ -68,18 +61,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
     paddingHorizontal: 50,
-  },
-  navbar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    backgroundColor: '#DB7C87',
-    paddingVertical: 20,
-    marginTop:138,
-  },
-  navIcon: {
-    width: 50,
-    height: 50,
   },
 });
 
