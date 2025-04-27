@@ -1,13 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, SafeAreaView } from 'react-native';
 import Navbar from '../components/Navbar';
 
-const AnalyseMeScreen = () => {
-  const navigation = useNavigation();
+const { width, height } = Dimensions.get('window');
 
+const AnalyseMeScreen = ({ navigation }) => {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Image source={require('../assets/images/truetone-logo.png')} style={styles.logo} />
       <View style={styles.box}>
         <Image source={require('../assets/images/star.png')} style={styles.star} />
@@ -20,22 +19,20 @@ const AnalyseMeScreen = () => {
         <Text style={styles.subtext}>take this quick and easy quiz to discover YOUR personal seasonal colour analysis</Text>
       </View>
       <Navbar/>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-start',
+    justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#FCE4EC',
-    paddingTop: 50,
-    paddingBottom:20,
   },
   logo: {
-    width: 400,
-    height: 140,
+    width: width * 1.1,
+    height: height * 0.17,
     resizeMode: 'contain',
   },
   box: {
@@ -43,21 +40,23 @@ const styles = StyleSheet.create({
     borderColor: '#DB7C87',
     borderStyle: 'dashed',
     width: '90%',
+    height: '50%',
     alignItems: 'center',
-    borderRadius: 15,
-    paddingVertical: 50,
-    marginTop:20,
-    marginBottom: 60,
+    borderRadius: 20,
+    marginBottom: 70,
   },
   star: {
-    width: 160,
+    width: width * 0.35,
+    height: width * 0.35,
+    resizeMode: 'contain',
   },
   button: {
     backgroundColor: '#EFB0B7',
-    paddingVertical: 10,
-    paddingHorizontal: 40,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
     borderRadius: 20,
-    marginBottom: 12,
+    marginBottom: 10,
+    marginTop: 15,
   },
   buttonText: {
     color: '#FFFFFF',
@@ -65,12 +64,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   subtext: {
-    fontSize: 19,
+    fontSize: 20,
     color: '#EFB0B7',
     textAlign: 'center',
     fontWeight: 'bold',
     paddingHorizontal: 50,
-    paddingBottom: 30,
   },
 });
 
