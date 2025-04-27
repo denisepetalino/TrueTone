@@ -28,7 +28,7 @@ const AnalyseMeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'space-between',
+    //justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#FCE4EC',
   },
@@ -43,14 +43,17 @@ const styles = StyleSheet.create({
     borderColor: '#DB7C87',
     borderStyle: 'dashed',
     width: '90%',
-    height: '100%',
+    height: '55%',
     alignItems: 'center',
-    marginBottom: 20,
+    flexGrow:1,
+    marginBottom: 180,
+    marginTop: 30,
   },
   star: {
     width: width * 0.35,
     height: width * 0.35,
     resizeMode: 'contain',
+    marginTop: 20,
   },
   button: {
     backgroundColor: '#EFB0B7',
@@ -58,7 +61,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: 20,
     marginBottom: 10,
-    marginTop: 15,
+    marginTop: 10,
   },
   buttonText: {
     color: '#FFFFFF',
