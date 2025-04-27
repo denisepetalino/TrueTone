@@ -27,13 +27,14 @@ const styles = StyleSheet.create({
     navbar: {
         flexDirection: 'row',
         justifyContent: 'space-around',
-        width: '105%',
+        width: '100%',
         backgroundColor: '#DB7C87',
         paddingVertical: 15,
     },
     navIcon: {
-        width: 40,
+        width: 50,
         height: 40,
+        resizeMode: 'contain',
     },
 });
 

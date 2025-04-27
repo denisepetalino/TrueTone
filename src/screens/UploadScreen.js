@@ -1,16 +1,15 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, StyleSheet, Image, Dimensions, SafeAreaView } from 'react-native';
 import Navbar from '../components/Navbar';
 
-const UploadScreen = () => {
-  const navigation = useNavigation();
+const {width, height} = Dimensions.get('window');
 
+const UploadScreen = () => {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Image source={require('../assets/images/truetone-logo.png')} style={styles.logo} />
       <View style={styles.box}>
-        <Image source={require('../assets/images/hellokittycamera.png')} />
+        <Image source={require('../assets/images/hellokittycamera.png')} style={styles.camera} />
         <Text style={styles.headingtext}>UPLOAD HERE!</Text>
         <Text style={styles.subtext}>
             1. use bright lighting {'\n'}
@@ -20,8 +19,10 @@ const UploadScreen = () => {
             5. ensure the item fills the majority of the frame {'\n'}
         </Text>
       </View>
-      <Navbar/>
-    </View>
+      <SafeAreaView style = {styles.navbarWrapper}>
+        <Navbar/>
+      </SafeAreaView>
+    </SafeAreaView>
   );
 };
 
@@ -35,8 +36,8 @@ const styles = StyleSheet.create({
     paddingBottom:20,
   },
   logo: {
-    width: 400,
-    height: 140,
+    width: width * 1.1,
+    height: height * 0.17,
     resizeMode: 'contain',
   },
   box: {
@@ -50,6 +51,11 @@ const styles = StyleSheet.create({
     marginTop:40,
     marginBottom: 12,
   },
+  camera: {
+    width: width * 0.2,
+    height: height * 0.1,
+    resizeMode: 'contain',
+  },
   headingtext: {
     color: '#DB7C87',
     fontSize: 35,
@@ -61,6 +67,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
     paddingHorizontal: 50,
+  },
+  navbarWrapper: {
+    alignSelf: 'stretch',
+    position: 'absolute',
+    bottom: 0,
+    left:0,
+    right:0,
   },
 });
 

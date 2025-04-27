@@ -18,7 +18,9 @@ const AnalyseMeScreen = ({ navigation }) => {
         </TouchableOpacity>
         <Text style={styles.subtext}>take this quick and easy quiz to discover YOUR personal seasonal colour analysis</Text>
       </View>
-      <Navbar/>
+      <SafeAreaView style = {styles.navbarWrapper}>
+        <Navbar/>
+      </SafeAreaView>
     </SafeAreaView>
   );
 };
@@ -37,13 +39,13 @@ const styles = StyleSheet.create({
   },
   box: {
     borderWidth: 6,
+    borderRadius: 20,
     borderColor: '#DB7C87',
     borderStyle: 'dashed',
     width: '90%',
-    height: '50%',
+    height: '100%',
     alignItems: 'center',
-    borderRadius: 20,
-    marginBottom: 70,
+    marginBottom: 20,
   },
   star: {
     width: width * 0.35,
@@ -69,6 +71,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
     paddingHorizontal: 50,
+  },
+  navbarWrapper: {
+    alignSelf: 'stretch',
+    position: 'absolute',
+    bottom: 0,
+    left:0,
+    right:0,
   },
 });
 
