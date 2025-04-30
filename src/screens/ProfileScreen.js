@@ -116,11 +116,21 @@ const ProfileScreen = () => {
       <SafeAreaView style={styles.container}>
         <Image source={require('../assets/images/truetone-logo.png')} style={styles.logo} />
         <Text style={styles.header}>Welcome to TrueTone!</Text>
-        <Text style={styles.subtext}>Please take the quiz first to gain your results!</Text>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AnalyseMe')}>
-          <Text style={styles.buttonText}>LET'S GO!</Text>
-        </TouchableOpacity>
-        <Navbar />
+        <Text style={styles.subtext}>Thank you for taking the time to be a part of my engineering project in my final year at Queen Mary University of London. This app was deigned with active fashion and social media Gen Z users in mind, combining the fun of personal colour analysis with the convenience of your phone. Have fun :) </Text>
+        <Image source={require('../assets/images/panda.png')} style={styles.panda} />
+        <View style={styles.introcontainer}>
+            <Text style={styles.subheading1}>HOW TO GET STARTED:</Text>
+            <Text style={styles.instructions}> Start by taking a quick quiz to discover your personal colour profile. {'\n'}
+                Then upload images of your wardrobe to find the items that truly suit YOU. {'\n'}
+                Click the button below to begin.
+            </Text>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AnalyseMe')}>
+            <Text style={styles.buttonText}>LET'S GO!</Text>
+            </TouchableOpacity>
+        </View>
+        <SafeAreaView style = {styles.navbarWrapper}>
+            <Navbar/>
+        </SafeAreaView>
       </SafeAreaView>
     );
   }
@@ -166,11 +176,17 @@ const ProfileScreen = () => {
               <View key={index} style={[styles.colorCircle, { backgroundColor: color }]} />
             ))}
           </View>
+          <TouchableOpacity style={styles.resetButton} onPress={async () => {
+            await AsyncStorage.removeItem('seasonalColorProfile');
+            navigation.replace('AnalyseMe');
+        }}>
+            <Text style={styles.resetButtonText}>RESET MY RESULTS</Text>
+        </TouchableOpacity>
         </View>
       </ScrollView>
       <SafeAreaView style = {styles.navbarWrapper}>
         <Navbar/>
-    </SafeAreaView>
+      </SafeAreaView>
     </SafeAreaView>
   );
 };
@@ -205,7 +221,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     minHeight: height * 0.8,
-    paddingBottom: 90,
+    paddingBottom: 100,
   },
   title: {
     fontSize: 20,
@@ -291,8 +307,8 @@ const styles = StyleSheet.create({
   subtext: {
     fontSize: 16,
     textAlign: 'center',
-    marginBottom: 20,
     color: '#DB7C87',
+    paddingHorizontal: 40,
   },
   button: {
     backgroundColor: '#DB7C87',
@@ -312,6 +328,45 @@ const styles = StyleSheet.create({
     bottom: 0,
     left:0,
     right:0,
+  },
+  resetButton: {
+    backgroundColor: '#DB7C87',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 20,
+    marginTop: 30,
+  },
+  resetButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  subheading1: {
+    fontSize: 25,
+    textAlign: 'center',
+    color: '#DB7C87',
+    fontWeight: 'bold',
+  },
+  instructions: {
+    fontSize: 16,
+    textAlign: 'center',
+    color: '#DB7C87',
+    padding: 10,
+  },
+  introcontainer: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 15,
+    width: '80%',
+    alignSelf: 'center',
+  },
+  panda: {
+    width: width * 0.3,
+    height: height * 0.1,
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    marginTop: 20,
   },
 });
 
