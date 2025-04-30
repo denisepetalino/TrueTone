@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Dimensions, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Dimensions, ScrollView, Image, Alert } from 'react-native';
 import Navbar from '../components/Navbar';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
@@ -85,7 +86,7 @@ const QuizScreen = () => {
     setAnswers({ ...answers, [questionId]: option });
   };
 
-  const calculateScore = () => {
+  const calculateScore = async () => {
     let undertoneScore = 0;
     let contrastScore = 0;
     let clarityScore = 0;
@@ -95,21 +96,27 @@ const QuizScreen = () => {
       if (!answer) return;
 
       if (q.factor === 'undertone') {
-        if (answer === 'Silver' || answer === 'Blue/Purple' || answer === 'Burns easily, barely tans' || answer === 'Icy tones' || answer === 'Grey, cool blue, or deep brown') {
+        if (['Silver', 'Blue/Purple', 'Burns easily, barely tans'].includes(answer)) {
           undertoneScore += 1;
-        } else if (answer === 'Gold' || answer === 'Greenish' || answer === 'Tans easily, rarely burns' || answer === 'Warm tones' || answer === 'Amber, hazel with gold, warm green') {
+        } else if (['Gold', 'Greenish', 'Tans easily, rarely burns'].includes(answer)) {
           undertoneScore -= 1;
         }
       } else if (q.factor === 'contrast') {
-        if (answer === 'Yes, stark contrast' || answer === 'Dark hair + light eyes/skin' || answer === 'Yes, I stand out') {
+        if (['Yes, stark contrast', 'Dark hair + light eyes/skin', 'Yes, I stand out'].includes(answer)) {
           contrastScore += 1;
         } else {
           contrastScore -= 1;
         }
       } else if (q.factor === 'clarity') {
-        if (answer === 'They make me glow!' || answer === 'Washed out or dull' || answer === 'Sharp and defined' || answer === 'Glow, they flatter me' || answer.includes('high-contrast patterns')) {
+        if (
+          ['They make me glow!', 'Washed out or dull', 'Sharp and defined', 'Glow, they flatter me'].includes(answer) ||
+          answer.includes('high-contrast patterns')
+        ) {
           clarityScore += 2;
-        } else if (answer === 'A bit too loud—I prefer toned-down colours' || answer === 'Harmonious, natural' || answer === 'A little harsh, prefer medium shades' || answer === 'Feel soft and calm, I like them' || answer.includes('blended patterns')) {
+        } else if (
+          ['A bit too loud—I prefer toned-down colours', 'Harmonious, natural', 'A little harsh, prefer medium shades', 'Feel soft and calm, I like them'].includes(answer) ||
+          answer.includes('blended patterns')
+        ) {
           clarityScore -= 2;
         } else if (answer.includes('deeper jewel tones') || answer.includes('deep-toned patterns')) {
           clarityScore += 1;
@@ -120,17 +127,32 @@ const QuizScreen = () => {
     });
 
     let result = '';
-    if (undertoneScore > 0 && contrastScore > 0 && clarityScore > 0) result = 'Cool Winter';
-    else if (undertoneScore > 0 && contrastScore > 0 && clarityScore < 0) result = 'Deep Winter';
-    else if (undertoneScore > 0 && contrastScore < 0 && clarityScore > 0) result = 'Cool Summer';
-    else if (undertoneScore > 0 && contrastScore < 0 && clarityScore < 0) result = 'Soft Summer';
-    else if (undertoneScore < 0 && contrastScore > 0 && clarityScore > 0) result = 'Warm Autumn';
-    else if (undertoneScore < 0 && contrastScore > 0 && clarityScore < 0) result = 'Deep Autumn';
-    else if (undertoneScore < 0 && contrastScore < 0 && clarityScore > 0) result = 'Warm Spring';
-    else if (undertoneScore < 0 && contrastScore < 0 && clarityScore < 0) result = 'Light Spring';
+    if (undertoneScore > 0 && contrastScore > 0 && clarityScore >= 2) result = 'Clear Winter';
+    else if (undertoneScore > 0 && contrastScore > 0 && clarityScore <= -1) result = 'Deep Winter';
+    else if (undertoneScore > 0 && contrastScore > 0) result = 'Cool Winter';
+
+    else if (undertoneScore > 0 && contrastScore < 0 && clarityScore >= 2) result = 'Light Summer';
+    else if (undertoneScore > 0 && contrastScore < 0 && clarityScore <= -1) result = 'Soft Summer';
+    else if (undertoneScore > 0 && contrastScore < 0) result = 'Cool Summer';
+
+    else if (undertoneScore < 0 && contrastScore > 0 && clarityScore >= 2) result = 'Clear Autumn';
+    else if (undertoneScore < 0 && contrastScore > 0 && clarityScore <= -1) result = 'Deep Autumn';
+    else if (undertoneScore < 0 && contrastScore > 0) result = 'Warm Autumn';
+
+    else if (undertoneScore < 0 && contrastScore < 0 && clarityScore >= 2) result = 'Clear Spring';
+    else if (undertoneScore < 0 && contrastScore < 0 && clarityScore <= -1) result = 'Light Spring';
+    else if (undertoneScore < 0 && contrastScore < 0) result = 'Warm Spring';
+
     else result = 'Neutral';
 
-    navigation.navigate('Profile', { result });
+    try {
+      await AsyncStorage.setItem('seasonalColorProfile', result);
+      Alert.alert('Profile Saved!', `You are a ${result}.`, [
+        { text: 'View Result', onPress: () => navigation.navigate('Profile', { result }) }
+      ]);
+    } catch (e) {
+      console.error('Failed to save result:', e);
+    }
   };
 
   return (
@@ -138,17 +160,12 @@ const QuizScreen = () => {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {questions.map((q) => (
           <View key={q.id} style={styles.questionBox}>
-            {q.image && (
-              <Image source={q.image} style={styles.questionImage} />
-            )}
+            {q.image && <Image source={q.image} style={styles.questionImage} />}
             <Text style={styles.questionText}>{q.question}</Text>
             {q.options.map((option) => (
               <TouchableOpacity
                 key={option}
-                style={[
-                  styles.optionButton,
-                  answers[q.id] === option && styles.selectedOption,
-                ]}
+                style={[styles.optionButton, answers[q.id] === option && styles.selectedOption]}
                 onPress={() => handleSelect(q.id, option)}
               >
                 <Text style={styles.optionText}>{option}</Text>
@@ -157,7 +174,7 @@ const QuizScreen = () => {
           </View>
         ))}
         <TouchableOpacity style={styles.submitButton} onPress={calculateScore}>
-          <Text style={styles.submitButtonText}>SEE MY SEASONAL PROFILE</Text>
+          <Text style={styles.submitButtonText}>See My Colour Profile</Text>
         </TouchableOpacity>
       </ScrollView>
       <SafeAreaView style={styles.navbarWrapper}>
