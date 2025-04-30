@@ -116,7 +116,7 @@ const ProfileScreen = () => {
       <SafeAreaView style={styles.container}>
         <Image source={require('../assets/images/truetone-logo.png')} style={styles.logo} />
         <Text style={styles.header}>Welcome to TrueTone!</Text>
-        <Text style={styles.subtext}>Thank you for taking the time to be a part of my engineering project in my final year at Queen Mary University of London. This app was deigned with active fashion and social media Gen Z users in mind, combining the fun of personal colour analysis with the convenience of your phone. Have fun :) </Text>
+        <Text style={styles.subtext}>Thank you for taking the time to be a part of my engineering project in my final year at Queen Mary University of London. This app was designed with active fashion and social media Gen Z users in mind, combining the fun of personal colour analysis with the convenience of your phone. Have fun :) </Text>
         <Image source={require('../assets/images/panda.png')} style={styles.panda} />
         <View style={styles.introcontainer}>
             <Text style={styles.subheading1}>HOW TO GET STARTED:</Text>
