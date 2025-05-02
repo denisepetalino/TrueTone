@@ -4,26 +4,26 @@
     "slug": "truetone-js",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/truetone.png",
+    "icon": "./src/assets/images/truetone.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/truetone.png",
+      "image": "./src/assets/images/truetone.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FCE4EC"
     },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/truetone.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./src/assets/images/truetone.png",
+        "backgroundColor": "#FCE4EC"
       },
       "edgeToEdgeEnabled": true
     },
     "web": {
-      "favicon": "./assets/images/truetone.png"
+      "favicon": "./src/assets/images/truetone.png"
     }
   }
 }

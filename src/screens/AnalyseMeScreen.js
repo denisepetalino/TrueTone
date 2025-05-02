@@ -28,7 +28,6 @@ const AnalyseMeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    //justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: '#FCE4EC',
   },
