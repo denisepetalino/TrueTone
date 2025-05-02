@@ -1,46 +1,153 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, Dimensions, SafeAreaView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  Dimensions,
+  SafeAreaView,
+  ScrollView,
+  Alert,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Navbar from '../components/Navbar';
+import profileData from '../data/profileData';
 
 const { width, height } = Dimensions.get('window');
 
-function WardrobeScreen(props) {
-    return (
-        <SafeAreaView style={styles.container}>
-            <Image source={require('../assets/images/truetone-logo.png')} style={styles.logo} />
-            <Text style={styles.text}> Wardrobe Screen </Text>
-        <SafeAreaView style = {styles.navbarWrapper}>
-            <Navbar/>
-        </SafeAreaView>
-        </SafeAreaView>
-    );
-}
+const WardrobeScreen = ({ navigation }) => {
+  const [keepItems, setKeepItems] = useState([]);
+  const [discardItems, setDiscardItems] = useState([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      const profileKey = await AsyncStorage.getItem('seasonalColourProfile');
+      const wardrobeRaw = await AsyncStorage.getItem('wardrobeItems');
+      const wardrobeItems = wardrobeRaw ? JSON.parse(wardrobeRaw) : [];
+
+      if (!profileKey || wardrobeItems.length === 0) {
+        Alert.alert(
+          'Wardrobe Locked',
+          'Please complete the quiz and upload your clothes to unlock wardrobe filtering!',
+          [
+            { text: 'Go to Quiz', onPress: () => navigation.navigate('Quiz') },
+            { text: 'Upload Clothes', onPress: () => navigation.navigate('Upload') }
+          ]
+        );
+        return;
+      }
+
+      const palette = profileData[profileKey]?.palette || [];
+
+      const keep = [];
+      const discard = [];
+
+      wardrobeItems.forEach(item => {
+        if (palette.includes(item.dominantColor)) {
+          keep.push(item);
+        } else {
+          discard.push(item);
+        }
+      });
+
+      setKeepItems(keep);
+      setDiscardItems(discard);
+    };
+
+    loadData();
+  }, []);
+
+  const renderClothingItems = (items) => (
+    items.map((item, index) => (
+      <Image
+        key={index}
+        source={{ uri: item.uri }}
+        style={styles.itemImage}
+        resizeMode="cover"
+      />
+    ))
+  );
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Image source={require('../assets/images/truetone-logo.png')} style={styles.logo} />
+
+        <View style={styles.sectionKeep}>
+          <Text style={styles.sectionTitle}>KEEP</Text>
+          {keepItems.length > 0 ? renderClothingItems(keepItems) : <Text style={styles.emptyText}>No matches yet</Text>}
+        </View>
+
+        <View style={styles.sectionDiscard}>
+          <Text style={styles.sectionTitle}>DISCARD</Text>
+          {discardItems.length > 0 ? renderClothingItems(discardItems) : <Text style={styles.emptyText}>No matches yet</Text>}
+        </View>
+      </ScrollView>
+
+      <SafeAreaView style={styles.navbarWrapper}>
+        <Navbar />
+      </SafeAreaView>
+    </SafeAreaView>
+  );
+};
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        backgroundColor: '#FCE4EC',
-        paddingTop: 50,
-        paddingBottom:20,
-    },
-    logo: {
-        width: width * 1.1,
-        height: height * 0.17,
-        resizeMode: 'contain',
-    },
-    navbarWrapper: {
-        alignSelf: 'stretch',
-        position: 'absolute',
-        bottom: 0,
-        left:0,
-        right:0,
-    },
-    text: {
-        fontSize: 20,
-        color: '#000',
-    },
-})
+  container: {
+    flex: 1,
+    backgroundColor: '#FCE4EC',
+  },
+  scrollContainer: {
+    alignItems: 'center',
+    paddingBottom: 120,
+  },
+  logo: {
+    width: width * 1.1,
+    height: height * 0.17,
+    resizeMode: 'contain',
+    marginBottom: 10,
+  },
+  sectionKeep: {
+    width: '90%',
+    backgroundColor: '#C8FACC',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  sectionDiscard: {
+    width: '90%',
+    backgroundColor: '#F9A8A8',
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    alignItems: 'center',
+  },
+  sectionTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#5A4E4C',
+  },
+  itemImage: {
+    width: width * 0.6,
+    height: width * 0.8,
+    borderRadius: 12,
+    marginBottom: 16,
+    borderWidth: 2,
+    borderColor: '#DB7C87',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#888',
+    fontStyle: 'italic',
+  },
+  navbarWrapper: {
+    alignSelf: 'stretch',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+});
 
 export default WardrobeScreen;

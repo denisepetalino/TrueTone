@@ -19,7 +19,6 @@ const ProfileScreen = () => {
       const fetchResult = async () => {
         try {
           const storedResult = await AsyncStorage.getItem('seasonalColourProfile');
-          console.log('Stored Result: ', storedResult);
           setResult(storedResult);
         } catch (error) {
           console.error('Error fetching result:', error);
@@ -31,7 +30,6 @@ const ProfileScreen = () => {
     }, [])
   );
 
-  console.log('Matching profile:', result, profileData[result]);
   const profile = profileData[result];
 
   if (loading) {
