@@ -105,8 +105,8 @@ const UploadScreen = () => {
       const updatedItems = [...parsed, newItem];
       await AsyncStorage.setItem('wardrobeItems', JSON.stringify(updatedItems));
 
-      Alert.alert('Saved!', 'Item added to your wardrobe.');
-      setImageUri(null);
+      Alert.alert('Saved!', `Item added to your wardrobe.\nDetected color: ${result.dominantColor}`);
+      setImageUri(null); 
     } catch (error) {
       console.error('Failed to save item:', error);
     } finally {
