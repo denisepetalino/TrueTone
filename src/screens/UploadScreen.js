@@ -12,8 +12,6 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import base64 from 'react-native-base64';
-import axios from 'axios';
 import Navbar from '../components/Navbar';
 
 const { width, height } = Dimensions.get('window');
@@ -21,6 +19,9 @@ const { width, height } = Dimensions.get('window');
 const UploadScreen = () => {
   const [imageUri, setImageUri] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  const cloudName = 'dw7qc0ug0';
+  const uploadPreset = 'truetone_uploads';
 
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -54,34 +55,28 @@ const UploadScreen = () => {
     }
   };
 
-  const getDominantColour = async (imageUri) => {
-    const apiKey = 'acc_c81892371f84ef4';
-    const apiSecret = '68f7fec60d94da579946e11f5d331552';
-    const encodedAuth = base64.encode(`${apiKey}:${apiSecret}`);
-
+  const uploadToCloudinary = async (localUri) => {
     const formData = new FormData();
-    formData.append('image', {
-      uri: imageUri,
+    formData.append('file', {
+      uri: localUri,
       type: 'image/jpeg',
       name: 'upload.jpg',
     });
+    formData.append('upload_preset', uploadPreset);
 
     try {
-      const response = await axios.post(
-        'https://api.imagga.com/v2/colors',
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            Authorization: `Basic ${encodedAuth}`,
-          },
-        }
-      );
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: 'POST',
+        body: formData,
+      });
 
-      const colour = response.data.result.colors.image_colors[0].html_code;
-      return colour;
+      const data = await response.json();
+      console.log('Cloudinary upload:', data);
+
+      const dominantColor = data.colors?.[0]?.[0] || null;
+      return { secure_url: data.secure_url, dominantColor };
     } catch (error) {
-      console.error('Axios error fetching dominant colour:', error.response?.data || error.message);
+      console.error('Cloudinary upload failed:', error);
       return null;
     }
   };
@@ -90,16 +85,17 @@ const UploadScreen = () => {
     if (!imageUri) return;
     setIsSaving(true);
 
-    const dominantColour = await getDominantColour(imageUri);
-    if (!dominantColour) {
+    const result = await uploadToCloudinary(imageUri);
+
+    if (!result || !result.dominantColor) {
       Alert.alert('Error', 'Could not detect colour. Try a clearer photo.');
       setIsSaving(false);
       return;
     }
 
     const newItem = {
-      uri: imageUri,
-      dominantColour,
+      uri: result.secure_url,
+      dominantColor: result.dominantColor,
     };
 
     try {
@@ -115,31 +111,6 @@ const UploadScreen = () => {
       console.error('Failed to save item:', error);
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  // ✅ TEST BUTTON FUNCTION
-  const testImaggaWithImageURL = async () => {
-    const apiKey = 'acc_c81892371f84ef4';
-    const apiSecret = '68f7fec60d94da579946e11f5d331552';
-    const encodedAuth = base64.encode(`${apiKey}:${apiSecret}`);
-
-    try {
-      const response = await axios.get(
-        'https://api.imagga.com/v2/colors?image_url=https://docs.imagga.com/static/images/docs/sample/japan-605234_1280.jpg',
-        {
-          headers: {
-            Authorization: `Basic ${encodedAuth}`,
-          },
-        }
-      );
-
-      const colour = response.data.result.colors.image_colors[0].html_code;
-      console.log('🎨 Dominant colour from URL:', colour);
-      Alert.alert('Dominant Colour (from URL)', colour);
-    } catch (error) {
-      console.error('Test URL colour error:', error.response?.data || error.message);
-      Alert.alert('Error', 'Failed to get colour from URL.');
     }
   };
 
@@ -165,10 +136,6 @@ const UploadScreen = () => {
 
           <TouchableOpacity style={styles.button} onPress={pickImage}>
             <Text style={styles.buttonText}>Choose from Gallery</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.button} onPress={testImaggaWithImageURL}>
-            <Text style={styles.buttonText}>Test API from URL</Text>
           </TouchableOpacity>
 
           {imageUri && (
