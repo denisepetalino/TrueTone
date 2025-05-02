@@ -143,7 +143,7 @@ const QuizScreen = () => {
     else if (undertoneScore > 0 && contrastScore < 0 && clarityScore <= -1) result = 'Soft Summer';
     else if (undertoneScore > 0 && contrastScore < 0) result = 'Cool Summer';
 
-    else if (undertoneScore < 0 && contrastScore > 0 && clarityScore >= 2) result = 'Clear Autumn';
+    else if (undertoneScore < 0 && contrastScore > 0 && clarityScore >= 2) result = 'Soft Autumn';
     else if (undertoneScore < 0 && contrastScore > 0 && clarityScore <= -1) result = 'Deep Autumn';
     else if (undertoneScore < 0 && contrastScore > 0) result = 'Warm Autumn';
 
@@ -154,7 +154,7 @@ const QuizScreen = () => {
     else result = 'Neutral';
 
     try {
-      await AsyncStorage.setItem('seasonalColorProfile', result);
+      await AsyncStorage.setItem('seasonalColourProfile', result);
       Alert.alert('Profile Saved!', `You are a ${result}.`, [
         { text: 'View Result', onPress: () => navigation.navigate('Profile', { result }) }
       ]);
