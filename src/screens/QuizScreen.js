@@ -154,7 +154,7 @@ const QuizScreen = () => {
     else result = 'Neutral';
 
     try {
-      await AsyncStorage.setItem('seasonalColourProfile', result);
+      await AsyncStorage.setItem('seasonalColorProfile', result);
       Alert.alert('Profile Saved!', `You are a ${result}.`, [
         { text: 'View Result', onPress: () => navigation.navigate('Profile', { result }) }
       ]);

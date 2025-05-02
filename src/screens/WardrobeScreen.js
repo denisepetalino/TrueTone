@@ -7,8 +7,8 @@ import {
   Dimensions,
   SafeAreaView,
   ScrollView,
-  Alert,
   TouchableOpacity,
+  Modal,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Navbar from '../components/Navbar';
@@ -19,27 +19,24 @@ const { width, height } = Dimensions.get('window');
 const WardrobeScreen = ({ navigation }) => {
   const [keepItems, setKeepItems] = useState([]);
   const [discardItems, setDiscardItems] = useState([]);
+  const [showLockModal, setShowLockModal] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadData = async () => {
-      const profileKey = await AsyncStorage.getItem('seasonalColourProfile');
+      const profileKey = await AsyncStorage.getItem('seasonalColorProfile');
       const wardrobeRaw = await AsyncStorage.getItem('wardrobeItems');
       const wardrobeItems = wardrobeRaw ? JSON.parse(wardrobeRaw) : [];
 
       if (!profileKey || wardrobeItems.length === 0) {
-        Alert.alert(
-          'Wardrobe Locked',
-          'Please complete the quiz and upload your clothes to unlock wardrobe filtering!',
-          [
-            { text: 'Go to Quiz', onPress: () => navigation.navigate('Quiz') },
-            { text: 'Upload Clothes', onPress: () => navigation.navigate('Upload') }
-          ]
-        );
+        if (isMounted) {
+          setShowLockModal(true);
+        }
         return;
       }
 
       const palette = profileData[profileKey]?.palette || [];
-
       const keep = [];
       const discard = [];
 
@@ -51,14 +48,19 @@ const WardrobeScreen = ({ navigation }) => {
         }
       });
 
-      setKeepItems(keep);
-      setDiscardItems(discard);
+      if (isMounted) {
+        setKeepItems(keep);
+        setDiscardItems(discard);
+      }
     };
 
     loadData();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  const renderClothingItems = (items) => (
+  const renderClothingItems = (items) =>
     items.map((item, index) => (
       <Image
         key={index}
@@ -66,27 +68,12 @@ const WardrobeScreen = ({ navigation }) => {
         style={styles.itemImage}
         resizeMode="cover"
       />
-    ))
-  );
+    ));
 
   const resetWardrobe = async () => {
-    Alert.alert(
-      'Reset Wardrobe?',
-      'Are you sure you want to remove all uploaded clothing items?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Yes',
-          onPress: async () => {
-            await AsyncStorage.removeItem('wardrobeItems');
-            setKeepItems([]);
-            setDiscardItems([]);
-            Alert.alert('Wardrobe Cleared', 'All uploaded wardrobe items have been removed.');
-          },
-          style: 'destructive',
-        },
-      ]
-    );
+    await AsyncStorage.removeItem('wardrobeItems');
+    setKeepItems([]);
+    setDiscardItems([]);
   };
 
   return (
@@ -96,23 +83,61 @@ const WardrobeScreen = ({ navigation }) => {
 
         <View style={styles.sectionKeep}>
           <Text style={styles.sectionTitle}>KEEP</Text>
-          {keepItems.length > 0 ? renderClothingItems(keepItems) : <Text style={styles.emptyText}>No matches yet</Text>}
+          {keepItems.length > 0 ? renderClothingItems(keepItems) : (
+            <Text style={styles.emptyText}>No matches yet</Text>
+          )}
         </View>
 
         <View style={styles.sectionDiscard}>
           <Text style={styles.sectionTitle}>DISCARD</Text>
-          {discardItems.length > 0 ? renderClothingItems(discardItems) : <Text style={styles.emptyText}>No matches yet</Text>}
+          {discardItems.length > 0 ? renderClothingItems(discardItems) : (
+            <Text style={styles.emptyText}>No matches yet</Text>
+          )}
         </View>
 
         <TouchableOpacity style={styles.resetButton} onPress={resetWardrobe}>
           <Text style={styles.resetButtonText}>RESET WARDROBE</Text>
         </TouchableOpacity>
-
       </ScrollView>
 
       <SafeAreaView style={styles.navbarWrapper}>
         <Navbar />
       </SafeAreaView>
+
+      {/* 🔒 Custom Modal instead of Alert.alert */}
+      <Modal
+        visible={showLockModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLockModal(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Wardrobe Locked</Text>
+            <Text style={styles.modalText}>
+              Please complete the quiz and upload your clothes to unlock wardrobe filtering!
+            </Text>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                setShowLockModal(false);
+                navigation.navigate('Quiz');
+              }}
+            >
+              <Text style={styles.modalButtonText}>Go to Quiz</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => {
+                setShowLockModal(false);
+                navigation.navigate('Upload');
+              }}
+            >
+              <Text style={styles.modalButtonText}>Upload Clothes</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -180,6 +205,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#888',
     fontStyle: 'italic',
+    fontFamily: 'Quicksand-Regular',
   },
   navbarWrapper: {
     alignSelf: 'stretch',
@@ -187,6 +213,46 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBox: {
+    backgroundColor: 'white',
+    padding: 25,
+    borderRadius: 20,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontFamily: 'HammersmithOne',
+    marginBottom: 10,
+    color: '#DB7C87',
+  },
+  modalText: {
+    fontSize: 16,
+    fontFamily: 'Quicksand-Regular',
+    textAlign: 'center',
+    color: '#444',
+    marginBottom: 20,
+  },
+  modalButton: {
+    backgroundColor: '#EFB0B7',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 15,
+    marginVertical: 5,
+    width: '100%',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    color: 'white',
+    textAlign: 'center',
+    fontFamily: 'HammersmithOne',
   },
 });
 

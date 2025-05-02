@@ -19,7 +19,7 @@ const ProfileScreen = () => {
     useCallback(() => {
       const fetchResult = async () => {
         try {
-          const storedResult = await AsyncStorage.getItem('seasonalColourProfile');
+          const storedResult = await AsyncStorage.getItem('seasonalColorProfile');
           setResult(storedResult);
         } catch (error) {
           console.error('Error fetching result:', error);
@@ -108,7 +108,7 @@ const ProfileScreen = () => {
             ))}
           </View>
           <TouchableOpacity style={styles.resetButton} onPress={async () => {
-            await AsyncStorage.removeItem('seasonalColourProfile');
+            await AsyncStorage.removeItem('seasonalColorProfile');
             navigation.replace('AnalyseMe');
         }}>
             <Text style={styles.resetButtonText}>RESET MY RESULTS</Text>
