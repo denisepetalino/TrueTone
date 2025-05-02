@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import base64 from 'react-native-base64';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 
@@ -53,9 +54,10 @@ const UploadScreen = () => {
     }
   };
 
-  const getDominantColor = async (imageUri) => {
+  const getDominantColour = async (imageUri) => {
     const apiKey = 'acc_c81892371f84ef4';
-    const apiSecret = '1e23ec2eb8be55a0cf55f5665e134537';
+    const apiSecret = '68f7fec60d94da579946e11f5d331552';
+    const encodedAuth = base64.encode(`${apiKey}:${apiSecret}`);
 
     const formData = new FormData();
     formData.append('image', {
@@ -71,26 +73,25 @@ const UploadScreen = () => {
         {
           headers: {
             'Content-Type': 'multipart/form-data',
-            Authorization: `Basic ${btoa(`${apiKey}:${apiSecret}`)}`,
+            Authorization: `Basic ${encodedAuth}`,
           },
         }
       );
 
-      const color = response.data.result.colors.image_colors[0].html_code;
-      return color;
+      const colour = response.data.result.colors.image_colors[0].html_code;
+      return colour;
     } catch (error) {
-      console.error('Error fetching dominant color:', error);
+      console.error('Axios error fetching dominant colour:', error.response?.data || error.message);
       return null;
     }
   };
 
   const handleSaveImage = async () => {
     if (!imageUri) return;
-
     setIsSaving(true);
 
-    const dominantColor = await getDominantColor(imageUri);
-    if (!dominantColor) {
+    const dominantColour = await getDominantColour(imageUri);
+    if (!dominantColour) {
       Alert.alert('Error', 'Could not detect colour. Try a clearer photo.');
       setIsSaving(false);
       return;
@@ -98,7 +99,7 @@ const UploadScreen = () => {
 
     const newItem = {
       uri: imageUri,
-      dominantColor,
+      dominantColour,
     };
 
     try {
@@ -114,6 +115,31 @@ const UploadScreen = () => {
       console.error('Failed to save item:', error);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // ✅ TEST BUTTON FUNCTION
+  const testImaggaWithImageURL = async () => {
+    const apiKey = 'acc_c81892371f84ef4';
+    const apiSecret = '68f7fec60d94da579946e11f5d331552';
+    const encodedAuth = base64.encode(`${apiKey}:${apiSecret}`);
+
+    try {
+      const response = await axios.get(
+        'https://api.imagga.com/v2/colors?image_url=https://docs.imagga.com/static/images/docs/sample/japan-605234_1280.jpg',
+        {
+          headers: {
+            Authorization: `Basic ${encodedAuth}`,
+          },
+        }
+      );
+
+      const colour = response.data.result.colors.image_colors[0].html_code;
+      console.log('🎨 Dominant colour from URL:', colour);
+      Alert.alert('Dominant Colour (from URL)', colour);
+    } catch (error) {
+      console.error('Test URL colour error:', error.response?.data || error.message);
+      Alert.alert('Error', 'Failed to get colour from URL.');
     }
   };
 
@@ -139,6 +165,10 @@ const UploadScreen = () => {
 
           <TouchableOpacity style={styles.button} onPress={pickImage}>
             <Text style={styles.buttonText}>Choose from Gallery</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.button} onPress={testImaggaWithImageURL}>
+            <Text style={styles.buttonText}>Test API from URL</Text>
           </TouchableOpacity>
 
           {imageUri && (
