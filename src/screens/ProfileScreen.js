@@ -109,8 +109,8 @@ const ProfileScreen = () => {
           </View>
           <TouchableOpacity style={styles.resetButton} onPress={async () => {
             await AsyncStorage.removeItem('seasonalColorProfile');
-            navigation.replace('AnalyseMe');
-        }}>
+            navigation.replace('Profile');
+            }}>
             <Text style={styles.resetButtonText}>RESET MY RESULTS</Text>
         </TouchableOpacity>
         </View>

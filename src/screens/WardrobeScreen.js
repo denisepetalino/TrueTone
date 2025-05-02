@@ -20,6 +20,7 @@ const WardrobeScreen = ({ navigation }) => {
   const [keepItems, setKeepItems] = useState([]);
   const [discardItems, setDiscardItems] = useState([]);
   const [showLockModal, setShowLockModal] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -74,6 +75,7 @@ const WardrobeScreen = ({ navigation }) => {
     await AsyncStorage.removeItem('wardrobeItems');
     setKeepItems([]);
     setDiscardItems([]);
+    setShowResetModal(false);
   };
 
   return (
@@ -95,7 +97,7 @@ const WardrobeScreen = ({ navigation }) => {
           )}
         </View>
 
-        <TouchableOpacity style={styles.resetButton} onPress={resetWardrobe}>
+        <TouchableOpacity style={styles.resetButton} onPress={() => setShowResetModal(true)}>
           <Text style={styles.resetButtonText}>RESET WARDROBE</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -104,7 +106,7 @@ const WardrobeScreen = ({ navigation }) => {
         <Navbar />
       </SafeAreaView>
 
-      {/* 🔒 Custom Modal instead of Alert.alert */}
+      {/* 🔒 Wardrobe Locked Modal */}
       <Modal
         visible={showLockModal}
         transparent
@@ -134,6 +136,37 @@ const WardrobeScreen = ({ navigation }) => {
               }}
             >
               <Text style={styles.modalButtonText}>Upload Clothes</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* 🧹 Reset Confirmation Modal */}
+      <Modal
+        visible={showResetModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowResetModal(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Reset Wardrobe?</Text>
+            <Text style={styles.modalText}>
+              Are you sure you want to remove all uploaded clothing items?
+            </Text>
+
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: '#DB7C87' }]}
+              onPress={resetWardrobe}
+            >
+              <Text style={styles.modalButtonText}>Yes</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={() => setShowResetModal(false)}
+            >
+              <Text style={styles.modalButtonText}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -232,6 +265,7 @@ const styles = StyleSheet.create({
     fontFamily: 'HammersmithOne',
     marginBottom: 10,
     color: '#DB7C87',
+    textAlign: 'center',
   },
   modalText: {
     fontSize: 16,
