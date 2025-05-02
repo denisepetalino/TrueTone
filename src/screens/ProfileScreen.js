@@ -72,6 +72,7 @@ const ProfileScreen = () => {
         <View style={styles.resultContainer}>
           <Text style={styles.title}>You are a</Text>
           <Text style={styles.result}>{result.toUpperCase()}!</Text>
+          <Image source={require('../assets/images/mymelody.jpg')} style={styles.resultimg} />
 
           <Text style={styles.indicatorLabel}>WARM/COOL TONE</Text>
           <View style={styles.bar}>
@@ -161,7 +162,6 @@ const styles = StyleSheet.create({
     fontSize: 45,
     fontWeight: 'bold',
     color: 'white',
-    marginBottom: 20,
   },
   indicatorLabel: {
     fontSize: 17,
@@ -297,6 +297,14 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginTop: 20,
   },
+  resultimg: {
+    width: width * 0.2,
+    height: height * 0.1,
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    marginBottom: 15,
+    borderRadius: 10,
+  }
 });
 
 export default ProfileScreen;

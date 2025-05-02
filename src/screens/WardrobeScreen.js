@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   ScrollView,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Navbar from '../components/Navbar';
@@ -68,6 +69,26 @@ const WardrobeScreen = ({ navigation }) => {
     ))
   );
 
+  const resetWardrobe = async () => {
+    Alert.alert(
+      'Reset Wardrobe?',
+      'Are you sure you want to remove all uploaded clothing items?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Yes',
+          onPress: async () => {
+            await AsyncStorage.removeItem('wardrobeItems');
+            setKeepItems([]);
+            setDiscardItems([]);
+            Alert.alert('Wardrobe Cleared', 'All uploaded wardrobe items have been removed.');
+          },
+          style: 'destructive',
+        },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -82,6 +103,11 @@ const WardrobeScreen = ({ navigation }) => {
           <Text style={styles.sectionTitle}>DISCARD</Text>
           {discardItems.length > 0 ? renderClothingItems(discardItems) : <Text style={styles.emptyText}>No matches yet</Text>}
         </View>
+
+        <TouchableOpacity style={styles.resetButton} onPress={resetWardrobe}>
+          <Text style={styles.resetButtonText}>RESET WARDROBE</Text>
+        </TouchableOpacity>
+
       </ScrollView>
 
       <SafeAreaView style={styles.navbarWrapper}>
@@ -105,6 +131,18 @@ const styles = StyleSheet.create({
     height: height * 0.17,
     resizeMode: 'contain',
     marginBottom: 10,
+  },
+  resetButton: {
+    backgroundColor: '#EFB0B7',
+    paddingVertical: 10,
+    paddingHorizontal: 25,
+    borderRadius: 20,
+    marginBottom: 20,
+  },
+  resetButtonText: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   sectionKeep: {
     width: '90%',

@@ -25,7 +25,14 @@ const UploadScreen = () => {
 
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) return;
+    if (!permission.granted){
+      Alert.alert(
+        "Permission Required",
+        "Allow access to your photo library to upload images?",
+        [{text: `OK`}]
+      );
+      return;
+    }
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: 'images',
@@ -41,7 +48,14 @@ const UploadScreen = () => {
 
   const takePhoto = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
-    if (!permission.granted) return;
+    if (!permission.granted){
+      Alert.alert(
+        "Permission Required",
+        "Allow access to your camera to upload images?",
+        [{text: `OK`}]
+      );
+      return;
+    }
 
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: 'images',
@@ -105,7 +119,7 @@ const UploadScreen = () => {
       const updatedItems = [...parsed, newItem];
       await AsyncStorage.setItem('wardrobeItems', JSON.stringify(updatedItems));
 
-      Alert.alert('Saved!', `Item added to your wardrobe.\nDetected color: ${result.dominantColor}`);
+      Alert.alert('Saved!', `Item added to your wardrobe.\nDetected colour: ${result.dominantColor}`);
       setImageUri(null); 
     } catch (error) {
       console.error('Failed to save item:', error);
