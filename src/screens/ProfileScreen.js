@@ -1,11 +1,12 @@
 import React, { useState, useCallback} from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity, ActivityIndicator, ScrollView, Image, Dimensions } from 'react-native';
+import { View, StyleSheet, SafeAreaView, TouchableOpacity, ActivityIndicator, ScrollView, Image, Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Navbar from '../components/Navbar';
 import { useFocusEffect } from '@react-navigation/native';
 import profileData from '../data/profileData';
+import Text from '../components/CustomText';
 
 const { width, height } = Dimensions.get('window');
 
