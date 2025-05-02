@@ -1,19 +1,19 @@
 const profileData = {
   'Deep Winter': {
     description: 'This means you have intense contrast and cool undertones! Your features are bold and striking. Dark hair, vivid eyes, and luminous skin. Deep Winters shine in saturated, rich colours like plum, emerald, and deep navy. Icy accents and bright jewel tones will energise your look, while soft pastels or warm earth tones can dull your impact. You wear drama and elegance effortlessly!',
-    palette: ['#000000', '#2C2C54', '#5B0E2D', '#990F4B', '#3E7CB1', '#007874', '#3B2F63', '#D72638', '#1B1B3A', '#E0D6EB', '#4A4E69', '#1C1C1C'],
+    palette: ['#000000', '#CC214D', '#0089E2', '#207203', '#404040', '#C50902', '#00A0B3', '#FAFBB0', '#A1A1A1', '#7626B0', '#A7FDE0', '#E46D26', '#D8D8DA', '#041781', '#01ECCC', '#6A481D', '#FB74F9', '#0026D3', '#01B470', '#6B3728'],
     tone: 0.8,
     depth: 0.2,
   },
   'Cool Winter': {
     description: 'This means you have icy undertones and a crisp overall appearance! Your skin may be pale with a bluish base and your eyes often hold a steel, cool depth. Cool Winters are among the iciest of the Winter group, requiring strictly blue-based hues. Colours like raspberry, cobalt, emerald and icy lavender will highlight your sharpness, while warm or earth tones can look muddy. Silver and true white will complement you beautifully! Cool Winters are clean, controlled and classic.',
-    palette: ['#003153', '#5A5B9F', '#A61C3C', '#284B63', '#4C516D', '#6B7AA1', '#1D3557', '#99BADD', '#2E3A59', '#7B2CBF', '#ECEBF3', '#171E2F'],
+    palette: ['#000000', '#AA9B8A', '#CA3467', '#656DFD', '#404040', '#FADCE6', '#993363', '#063AA5', '#747474', '#F189AA', '#FA2B57', '#61D4FC', '#979999', '#FB74FF', '#7928D4', '#65CF9B', '#DEE0E2', '#C933C9','#D0D9FA', '#FAFBAF'],
     tone: 0.85,
     depth: 0.5,
   },
   'Clear Winter': {
     description: 'This means you have high contrast and vivid clarity in your features! You likely have bright eyes, cool undertones, and a bold presence. Clear Winters sparkle in pure, saturated colours like electric blue, cherry red, emerald and icy pink. Muted tones or anything overly warm may flatten your look. You glow in crisp, icy contrast, think snow with a flash of neon!',
-    palette: ['#000000', '#FFFFFF', '#FF0055', '#00BFFF', '#228B22', '#FF1493', '#9932CC', '#00CED1', '#FFC0CB', '#0047AB', '#66FF66', '#B0C4DE'],
+    palette: ['#000000', '#404040', '#A69D8E', '#FD74FE', '#061889', '#FBFCC1', '#CA266B', '#0627D3', '#D3D9FD', '#7B1325', '#5DD5FC', '#584E44', '#EFBFFD', '#C933C7', '#65D09C'],
     tone: 0.9,
     depth: 0.3,
   },

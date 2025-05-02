@@ -210,6 +210,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: 'bold',
     marginTop: 30,
+    marginBottom: 7,
     color: 'white',
     textAlign: 'center',
   },
@@ -219,8 +220,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   colorCircle: {
-    width: 45,
-    height: 45,
+    width: 30,
+    height: 30,
     borderRadius: 30,
     margin: 5,
     borderWidth: 1,
