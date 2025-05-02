@@ -141,8 +141,9 @@ const styles = StyleSheet.create({
   },
   resetButtonText: {
     color: 'white',
-    fontSize: 20,
+    fontSize: 25,
     fontWeight: 'bold',
+    fontFamily: 'HammersmithOne',
   },
   sectionKeep: {
     width: '90%',
@@ -161,10 +162,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 40,
     fontWeight: 'bold',
     marginBottom: 10,
     color: '#5A4E4C',
+    fontFamily: 'HammersmithOne',
   },
   itemImage: {
     width: width * 0.6,

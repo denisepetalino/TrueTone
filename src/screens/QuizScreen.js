@@ -217,10 +217,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   questionText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#DB7C87',
-    marginBottom: 10,
+    margin: 15,
+    textAlign: 'center',
+    fontFamily: 'Quicksand-SemiBold',
   },
   optionButton: {
     backgroundColor: '#EFB0B7',
@@ -235,6 +237,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     textAlign: 'center',
+    fontFamily: 'HammersmithOne',
   },
   submitButton: {
     backgroundColor: '#DB7C87',
@@ -245,8 +248,9 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
+    fontFamily: 'HammersmithOne',
   },
   navbarWrapper: {
     alignSelf: 'stretch',

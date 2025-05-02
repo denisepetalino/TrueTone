@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState} from 'react';
+import * as Font from 'expo-font';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {View, ActivityIndicator} from 'react-native';
+
 import AnalyseMeScreen from './screens/AnalyseMeScreen';
 import QuizScreen from './screens/QuizScreen';
 import UploadScreen from './screens/UploadScreen';
@@ -10,6 +13,25 @@ import ProfileScreen from './screens/ProfileScreen';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    Font.loadAsync({
+      'HammersmithOne': require('./assets/fonts/HammersmithOne-Regular.ttf'),
+      'Quicksand-Light': require('./assets/fonts/Quicksand-Light.ttf'),
+      'Quicksand-Regular': require('./assets/fonts/Quicksand-Regular.ttf'),
+      'Quicksand-SemiBold': require('./assets/fonts/Quicksand-SemiBold.ttf'),
+    }).then(() => setFontsLoaded(true));
+  }, []);
+
+  if (!fontsLoaded) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#DB7C87" />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Profile">

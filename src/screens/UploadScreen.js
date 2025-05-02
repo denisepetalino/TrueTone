@@ -204,17 +204,18 @@ const styles = StyleSheet.create({
   },
   headingtext: {
     color: '#DB7C87',
-    fontSize: 35,
+    fontSize: 40,
     fontWeight: 'bold',
     marginTop: 5,
+    fontFamily: 'HammersmithOne',
   },
   subtext: {
-    fontSize: 15,
+    fontSize: 21,
     color: '#EFB0B7',
     textAlign: 'center',
     fontWeight: 'bold',
-    paddingHorizontal: 50,
-    marginVertical: 10,
+    paddingHorizontal: 45,
+    fontFamily: 'Quicksand-SemiBold',
   },
   button: {
     backgroundColor: '#DB7C87',
@@ -225,8 +226,9 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#FFF',
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
+    fontFamily: 'HammersmithOne',
   },
   preview: {
     width: width * 0.6,

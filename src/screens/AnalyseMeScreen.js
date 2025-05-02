@@ -67,6 +67,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 35,
     fontWeight: 'bold',
+    fontFamily: 'HammersmithOne',
   },
   subtext: {
     fontSize: 20,
@@ -74,6 +75,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
     paddingHorizontal: 50,
+    fontFamily: 'Quicksand-SemiBold',
   },
   navbarWrapper: {
     alignSelf: 'stretch',

@@ -45,13 +45,13 @@ const ProfileScreen = () => {
     return (
       <SafeAreaView style={styles.container}>
         <Image source={require('../assets/images/truetone-logo.png')} style={styles.logo} />
-        <Text style={styles.header}>Welcome to TrueTone!</Text>
+        <Text style={styles.header}>WELCOME TO TRUETONE!</Text>
         <Text style={styles.subtext}>Thank you for taking the time to be a part of my engineering project in my final year at Queen Mary University of London. This app was designed with active fashion and social media Gen Z users in mind, combining the fun of personal colour analysis with the convenience of your phone. Have fun :) </Text>
         <Image source={require('../assets/images/panda.png')} style={styles.panda} />
         <View style={styles.introcontainer}>
             <Text style={styles.subheading1}>HOW TO GET STARTED:</Text>
-            <Text style={styles.instructions}> Start by taking a quick quiz to discover your personal colour profile. {'\n'}
-                Then upload images of your wardrobe to find the items that truly suit YOU. {'\n'}
+            <Text style={styles.instructions}> Take a quick quiz to discover your personal colour profile. {'\n'}
+                Upload images of your wardrobe to find the items that truly suit YOU. {'\n'}
                 Click the button below to begin.
             </Text>
             <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AnalyseMe')}>
@@ -155,21 +155,21 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   title: {
-    fontSize: 20,
+    fontSize: 25,
     color: 'white',
-    fontWeight: '600',
+    fontFamily: 'QuickSand-Regular',
   },
   result: {
-    fontSize: 45,
-    fontWeight: 'bold',
+    fontSize: 48,
     color: 'white',
+    fontFamily: 'HammersmithOne',
   },
   indicatorLabel: {
     fontSize: 17,
-    fontWeight: 'bold',
     color: 'white',
     alignSelf: 'flex-end',
     marginVertical: 7,
+    fontFamily: 'QuickSand-SemiBold',
   },
   bar: {
     width: '100%',
@@ -205,20 +205,23 @@ const styles = StyleSheet.create({
     color: '#B46770',
     textAlign: 'center',
     lineHeight: 20,
-    fontWeight: 500,
+    fontFamily: 'QuickSand-Light',
   },
   subheading: {
-    fontSize: 17,
-    fontWeight: 'bold',
+    fontSize: 20,
     marginTop: 30,
     marginBottom: 7,
     color: 'white',
     textAlign: 'center',
+    fontFamily: 'HammersmithOne',
   },
   paletteContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 10,
   },
   colorCircle: {
     width: 30,
@@ -230,16 +233,17 @@ const styles = StyleSheet.create({
   },
   header: {
     fontSize: 24,
-    fontWeight: 'bold',
     color: '#DB7C87',
     marginBottom: 10,
     textAlign: 'center',
+    fontFamily: 'HammersmithOne',
   },
   subtext: {
     fontSize: 16,
     textAlign: 'center',
     color: '#DB7C87',
     paddingHorizontal: 40,
+    fontFamily: 'QuickSand-Regular',
   },
   button: {
     backgroundColor: '#DB7C87',
@@ -250,8 +254,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: 17,
+    fontFamily: 'HammersmithOne',
   },
   navbarWrapper: {
     alignSelf: 'stretch',
@@ -269,21 +273,22 @@ const styles = StyleSheet.create({
   },
   resetButtonText: {
     color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 23,
     textAlign: 'center',
+    fontFamily: 'HammersmithOne',
   },
   subheading1: {
     fontSize: 25,
     textAlign: 'center',
     color: '#DB7C87',
-    fontWeight: 'bold',
+    fontFamily: 'HammersmithOne',
   },
   instructions: {
     fontSize: 16,
     textAlign: 'center',
     color: '#DB7C87',
     padding: 10,
+    fontFamily: 'QuickSand-Regular',
   },
   introcontainer: {
     backgroundColor: 'white',
