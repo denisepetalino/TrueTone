@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "truetone-js",
+    "slug": "truetone-js",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/truetone.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/truetone.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/truetone.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "favicon": "./assets/images/truetone.png"
+    }
+  }
+}
