@@ -32,49 +32,57 @@ const questions = [
     id: 4,
     factor: 'contrast',
     question: 'Is there a strong contrast between your hair, eyes, and skin?',
-    options: ['Yes, stark contrast', 'No, everything blends softly'],
+    options: ['Yes, high contrast', 'No, everything blends softly'],
+    image: require('../assets/images/quiz/contrast.png'),
   },
   {
     id: 5,
     factor: 'contrast',
     question: 'Which describes your natural hair and eye combo?',
-    options: ['Dark hair + light eyes/skin', 'Blonde/light brown hair + light eyes/skin'],
+    options: ['Dark hair + light eyes', 'Light hair + light eyes', 'Dark hair + dark eyes', 'Light hair + dark eyes'],
+    image: require('../assets/images/quiz/darklight.png'),
   },
   {
     id: 6,
     factor: 'contrast',
     question: 'Do bold, high-contrast outfits suit you better?',
     options: ['Yes, I stand out', 'No, softer blends feel better'],
+    image: require('../assets/images/quiz/contrastoutfits.png'),
   },
   {
     id: 7,
     factor: 'clarity',
     question: 'How do high-saturation colours (e.g., cobalt blue, emerald green) look on you?',
-    options: ['They make me glow!', 'A bit too loud—I prefer toned-down colours', 'They’re okay, but deeper jewel tones suit me better', 'I avoid them—lighter colours are more flattering'],
+    options: ['They make me glow!', 'A bit too loud, I prefer toned-down colours', 'They’re okay, but deeper tones suit me better', 'I avoid them, lighter colours are more flattering'],
+    image: require('../assets/images/quiz/bluegreen.png'),
   },
   {
     id: 8,
     factor: 'clarity',
     question: 'When wearing soft, dusty shades (e.g., sage green, dusty rose), your skin looks…',
     options: ['Washed out or dull', 'Harmonious, natural', 'Okay, but not my best', 'Even brighter or fresher'],
+    image: require('../assets/images/quiz/sagerose.png'),
   },
   {
     id: 9,
     factor: 'clarity',
     question: 'Dark, rich colours (e.g., black, burgundy) make your features look…',
     options: ['Sharp and defined', 'A little harsh, prefer medium shades', 'Overpowering, I stick to lighter tones', 'They work, but I shine more in vibrant brights'],
+    image: require('../assets/images/quiz/blackburgundy.png'),
   },
   {
     id: 10,
     factor: 'clarity',
     question: 'Pastel colours (e.g., baby pink, sky blue) make your complexion…',
     options: ['Glow, they flatter me', 'Look bland, I need more intensity', 'Feel soft and calm, I like them', 'Uneven, I avoid them'],
+    image: require('../assets/images/quiz/pinkblue.png'),
   },
   {
     id: 11,
     factor: 'clarity',
     question: 'Which of these patterns do you gravitate towards?',
     options: ['Crisp, high-contrast patterns (e.g., stripes, bold prints)', 'Soft, blended patterns (e.g., watercolor florals)', 'Strong, deep-toned patterns (e.g., paisley in jewel tones)', 'Light, airy patterns (e.g., small florals in pastel tones)'],
+    image: require('../assets/images/quiz/patterns.png'),
   },
 ];
 
@@ -102,7 +110,7 @@ const QuizScreen = () => {
           undertoneScore -= 1;
         }
       } else if (q.factor === 'contrast') {
-        if (['Yes, stark contrast', 'Dark hair + light eyes/skin', 'Yes, I stand out'].includes(answer)) {
+        if (['Yes, high contrast', 'Dark hair + light eyes', 'Yes, I stand out', 'Dark hair + dark eyes'].includes(answer)) {
           contrastScore += 1;
         } else {
           contrastScore -= 1;
@@ -114,11 +122,11 @@ const QuizScreen = () => {
         ) {
           clarityScore += 2;
         } else if (
-          ['A bit too loud—I prefer toned-down colours', 'Harmonious, natural', 'A little harsh, prefer medium shades', 'Feel soft and calm, I like them'].includes(answer) ||
+          ['A bit too loud, I prefer toned-down colours', 'Harmonious, natural', 'A little harsh, prefer medium shades', 'Feel soft and calm, I like them'].includes(answer) ||
           answer.includes('blended patterns')
         ) {
           clarityScore -= 2;
-        } else if (answer.includes('deeper jewel tones') || answer.includes('deep-toned patterns')) {
+        } else if (answer.includes('deeper tones') || answer.includes('deep-toned patterns')) {
           clarityScore += 1;
         } else if (answer.includes('lighter colours') || answer.includes('light, airy patterns')) {
           clarityScore -= 1;
