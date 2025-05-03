@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,13 +6,16 @@ import {
   Image,
   Dimensions,
   SafeAreaView,
-  ScrollView,
   TouchableOpacity,
   Modal,
+  Animated,
+  FlatList,
+  PanResponder,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Navbar from '../components/Navbar';
 import profileData from '../data/profileData';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
 
@@ -21,92 +24,168 @@ const WardrobeScreen = ({ navigation }) => {
   const [discardItems, setDiscardItems] = useState([]);
   const [showLockModal, setShowLockModal] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
+  const [fullscreenActive, setFullscreenActive] = useState(false);
+  const [cardIndex, setCardIndex] = useState(0);
+  const [donatedItems, setDonatedItems] = useState([]);
+  const [rescuedItems, setRescuedItems] = useState([]);
+
+  const pan = useRef(new Animated.ValueXY()).current;
+  const rotate = pan.x.interpolate({
+    inputRange: [-200, 0, 200],
+    outputRange: ['-15deg', '0deg', '15deg'],
+  });
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dx) > 20,
+      onPanResponderMove: Animated.event([null, { dx: pan.x }], { useNativeDriver: false }),
+      onPanResponderRelease: (_, { dx }) => {
+        if (dx > 120) {
+          setDonatedItems(prev => [...prev, discardItems[cardIndex]]);
+          nextCard();
+        } else if (dx < -120) {
+          setRescuedItems(prev => [...prev, discardItems[cardIndex]]);
+          nextCard();
+        } else {
+          Animated.spring(pan, { toValue: { x: 0, y: 0 }, useNativeDriver: false }).start();
+        }
+      },
+    })
+  ).current;
+
+  const nextCard = () => {
+    Animated.timing(pan, {
+      toValue: { x: 0, y: 0 },
+      duration: 200,
+      useNativeDriver: false,
+    }).start(() => setCardIndex(prev => prev + 1));
+  };
+
+  const loadData = async () => {
+    const profileKey = await AsyncStorage.getItem('seasonalColorProfile');
+    const wardrobeRaw = await AsyncStorage.getItem('wardrobeItems');
+    const wardrobeItems = wardrobeRaw ? JSON.parse(wardrobeRaw) : [];
+
+    if (!profileKey || wardrobeItems.length === 0) {
+      setShowLockModal(true);
+      return;
+    }
+
+    const palette = profileData[profileKey]?.palette || [];
+    const keep = [];
+    const discard = [];
+
+    wardrobeItems.forEach(item => {
+      if (palette.includes(item.dominantColor)) {
+        keep.push(item);
+      } else {
+        discard.push(item);
+      }
+    });
+
+    setKeepItems(keep);
+    setDiscardItems(discard);
+  };
 
   useEffect(() => {
-    let isMounted = true;
-
-    const loadData = async () => {
-      const profileKey = await AsyncStorage.getItem('seasonalColorProfile');
-      const wardrobeRaw = await AsyncStorage.getItem('wardrobeItems');
-      const wardrobeItems = wardrobeRaw ? JSON.parse(wardrobeRaw) : [];
-
-      if (!profileKey || wardrobeItems.length === 0) {
-        if (isMounted) {
-          setShowLockModal(true);
-        }
-        return;
-      }
-
-      const palette = profileData[profileKey]?.palette || [];
-      const keep = [];
-      const discard = [];
-
-      wardrobeItems.forEach(item => {
-        if (palette.includes(item.dominantColor)) {
-          keep.push(item);
-        } else {
-          discard.push(item);
-        }
-      });
-
-      if (isMounted) {
-        setKeepItems(keep);
-        setDiscardItems(discard);
-      }
-    };
-
     loadData();
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
-  const renderClothingItems = (items) =>
-    items.map((item, index) => (
-      <Image
-        key={index}
-        source={{ uri: item.uri }}
-        style={styles.itemImage}
-        resizeMode="cover"
-      />
-    ));
-
   const resetWardrobe = async () => {
-    await AsyncStorage.removeItem('wardrobeItems');
-    setKeepItems([]);
-    setDiscardItems([]);
-    setShowResetModal(false);
+    try {
+      await AsyncStorage.removeItem('wardrobeItems');
+      setKeepItems([]);
+      setDiscardItems([]);
+      setCardIndex(0);
+      setDonatedItems([]);
+      setRescuedItems([]);
+      setShowResetModal(false);
+      await loadData();
+    } catch (e) {
+      console.error('Failed to reset wardrobe', e);
+    }
+  };
+
+  const renderFullscreen = () => {
+    const current = discardItems[cardIndex];
+    if (!current) return null;
+    return (
+      <View style={styles.fullscreenBackdrop}>
+        <Text style={styles.fullscreenInstruction}>swipe RIGHT to DONATE (✓) {"\n"} swipe LEFT to KEEP (✗)</Text>
+        <Animated.View
+          {...panResponder.panHandlers}
+          style={[styles.fullscreenCard, { transform: [{ translateX: pan.x }, { rotate }] }]}
+        >
+          <Image source={{ uri: current.uri }} style={styles.fullscreenImage} />
+        </Animated.View>
+        <View style={styles.swipeLabels}>
+          <Text style={styles.noLabel}>✗</Text>
+          <Text style={styles.yesLabel}>✓</Text>
+        </View>
+        <TouchableOpacity onPress={() => setFullscreenActive(false)} style={styles.closeFullscreen}>
+          <Text style={styles.resetButtonText}>CLOSE</Text>
+        </TouchableOpacity>
+      </View>
+    );
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Image source={require('../assets/images/truetone-logo.png')} style={styles.logo} />
+      <Image source={require('../assets/images/truetone-logo.png')} style={styles.logo} />
 
+      <View style={styles.halfContainer}>
         <View style={styles.sectionKeep}>
           <Text style={styles.sectionTitle}>KEEP</Text>
-          {keepItems.length > 0 ? renderClothingItems(keepItems) : (
+          {keepItems.length > 0 ? (
+            <FlatList
+              data={keepItems}
+              renderItem={({ item }) => (
+                <Image source={{ uri: item.uri }} style={styles.itemImage} />
+              )}
+              horizontal
+              keyExtractor={(_, index) => index.toString()}
+              showsHorizontalScrollIndicator={false}
+            />
+          ) : (
             <Text style={styles.emptyText}>No matches yet</Text>
           )}
         </View>
 
         <View style={styles.sectionDiscard}>
           <Text style={styles.sectionTitle}>DISCARD</Text>
-          {discardItems.length > 0 ? renderClothingItems(discardItems) : (
+          {discardItems.length > 0 ? (
+            <FlatList
+              data={discardItems}
+              renderItem={({ item }) => (
+                <Image source={{ uri: item.uri }} style={styles.itemImage} />
+              )}
+              horizontal
+              keyExtractor={(_, index) => index.toString()}
+              showsHorizontalScrollIndicator={false}
+            />
+          ) : (
             <Text style={styles.emptyText}>No matches yet</Text>
           )}
+          {discardItems.length > 0 && (
+            <TouchableOpacity onPress={() => setFullscreenActive(true)} style={styles.fullscreenIcon}>
+              <MaterialIcons name="fullscreen" size={24} color="#e3e3e3" />
+            </TouchableOpacity>
+          )}
         </View>
+      </View>
 
+      <View style={styles.resetWrapper}>
         <TouchableOpacity style={styles.resetButton} onPress={() => setShowResetModal(true)}>
           <Text style={styles.resetButtonText}>RESET WARDROBE</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
 
       <SafeAreaView style={styles.navbarWrapper}>
         <Navbar />
       </SafeAreaView>
 
-      {/* 🔒 Wardrobe Locked Modal */}
+      {fullscreenActive && renderFullscreen()}
+
       <Modal
         visible={showLockModal}
         transparent
@@ -141,7 +220,6 @@ const WardrobeScreen = ({ navigation }) => {
         </View>
       </Modal>
 
-      {/* 🧹 Reset Confirmation Modal */}
       <Modal
         visible={showResetModal}
         transparent
@@ -154,14 +232,12 @@ const WardrobeScreen = ({ navigation }) => {
             <Text style={styles.modalText}>
               Are you sure you want to remove all uploaded clothing items?
             </Text>
-
             <TouchableOpacity
               style={[styles.modalButton, { backgroundColor: '#DB7C87' }]}
               onPress={resetWardrobe}
             >
               <Text style={styles.modalButtonText}>Yes</Text>
             </TouchableOpacity>
-
             <TouchableOpacity
               style={styles.modalButton}
               onPress={() => setShowResetModal(false)}
@@ -179,60 +255,130 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FCE4EC',
-  },
-  scrollContainer: {
     alignItems: 'center',
-    paddingBottom: 120,
   },
   logo: {
     width: width * 1.1,
     height: height * 0.17,
     resizeMode: 'contain',
-    marginBottom: 10,
+    marginBottom: 5,
   },
-  resetButton: {
-    backgroundColor: '#EFB0B7',
-    paddingVertical: 10,
-    paddingHorizontal: 25,
-    borderRadius: 20,
-    marginBottom: 20,
-  },
-  resetButtonText: {
-    color: 'white',
-    fontSize: 25,
-    fontWeight: 'bold',
-    fontFamily: 'HammersmithOne',
+  halfContainer: {
+    flex: 1,
+    width: '100%',
   },
   sectionKeep: {
-    width: '90%',
+    flex: 1,
     backgroundColor: '#C8FACC',
     borderRadius: 20,
-    padding: 20,
-    marginBottom: 20,
+    padding: 10,
+    marginHorizontal: 20,
+    marginBottom: 5,
     alignItems: 'center',
   },
   sectionDiscard: {
-    width: '90%',
+    flex: 1,
     backgroundColor: '#F9A8A8',
     borderRadius: 20,
-    padding: 20,
-    marginBottom: 20,
+    padding: 10,
+    marginHorizontal: 20,
     alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
   },
   sectionTitle: {
-    fontSize: 40,
+    fontSize: 30,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 5,
     color: '#5A4E4C',
     fontFamily: 'HammersmithOne',
   },
   itemImage: {
-    width: width * 0.6,
-    height: width * 0.8,
-    borderRadius: 12,
-    marginBottom: 16,
+    width: width * 0.3,
+    height: width * 0.4,
+    borderRadius: 10,
     borderWidth: 2,
     borderColor: '#DB7C87',
+    alignSelf: 'center',
+    marginRight: 10,
+  },
+  fullscreenBackdrop: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  fullscreenInstruction: {
+    color: '#fff',
+    fontFamily: 'Quicksand-Regular',
+    fontSize: 18,
+    marginBottom: 10,
+    marginLeft: 13,
+  },
+  fullscreenCard: {
+    width: width * 0.75,
+    height: width * 0.95,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  fullscreenImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  swipeLabels: {
+    width: '90%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    position: 'absolute',
+    top: '15%',
+  },
+  noLabel: {
+    fontSize: 48,
+    color: '#F44336',
+    fontWeight: 'bold',
+  },
+  yesLabel: {
+    fontSize: 48,
+    color: '#4CAF50',
+    fontWeight: 'bold',
+  },
+  closeFullscreen: {
+    marginTop: 20,
+    backgroundColor: '#DB7C87',
+    paddingVertical: 10,
+    paddingHorizontal: 25,
+    borderRadius: 20,
+  },
+  fullscreenIcon: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 12,
+    padding: 2,
+  },
+  resetWrapper: {
+    marginBottom: 60,
+  },
+  resetButton: {
+    backgroundColor: '#DB7C87',
+    paddingVertical: 10,
+    paddingHorizontal: 25,
+    borderRadius: 20,
+    marginTop: 15,
+    marginBottom: 25,
+  },
+  resetButtonText: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
+    fontFamily: 'HammersmithOne',
   },
   emptyText: {
     fontSize: 16,
