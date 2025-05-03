@@ -28,6 +28,8 @@ const WardrobeScreen = ({ navigation }) => {
   const [cardIndex, setCardIndex] = useState(0);
   const [donatedItems, setDonatedItems] = useState([]);
   const [rescuedItems, setRescuedItems] = useState([]);
+  const [showDonationModal, setShowDonationModal] = useState(false);
+  const [finalDonatedItems, setFinalDonatedItems] = useState([]);
 
   const pan = useRef(new Animated.ValueXY()).current;
   const rotate = pan.x.interpolate({
@@ -40,15 +42,15 @@ const WardrobeScreen = ({ navigation }) => {
       onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dx) > 20,
       onPanResponderMove: Animated.event([null, { dx: pan.x }], { useNativeDriver: false }),
       onPanResponderRelease: (_, { dx }) => {
+        const currentItem = discardItems[cardIndex];
+        if (!currentItem) return;
+
         if (dx > 120) {
-          setDonatedItems(prev => [...prev, discardItems[cardIndex]]);
-          nextCard();
+          setDonatedItems(prev => [...prev, currentItem]);
         } else if (dx < -120) {
-          setRescuedItems(prev => [...prev, discardItems[cardIndex]]);
-          nextCard();
-        } else {
-          Animated.spring(pan, { toValue: { x: 0, y: 0 }, useNativeDriver: false }).start();
+          setRescuedItems(prev => [...prev, currentItem]);
         }
+        nextCard();
       },
     })
   ).current;
@@ -58,52 +60,77 @@ const WardrobeScreen = ({ navigation }) => {
       toValue: { x: 0, y: 0 },
       duration: 200,
       useNativeDriver: false,
-    }).start(() => setCardIndex(prev => prev + 1));
+    }).start(() => {
+      const isLastCard = cardIndex >= discardItems.length - 1;
+      if (isLastCard) {
+        const remaining = discardItems.filter(item => !donatedItems.includes(item));
+        setFinalDonatedItems(donatedItems);
+        setDiscardItems(remaining);
+        setCardIndex(0);
+        setFullscreenActive(false);
+        setDonatedItems([]);
+        setRescuedItems([]);
+        setTimeout(() => setShowDonationModal(true), 300);
+      } else {
+        setCardIndex(prev => prev + 1);
+      }
+    });
+  };
+
+  const hexToRgb = hex => {
+    const clean = hex.replace('#', '');
+    return {
+      r: parseInt(clean.substring(0, 2), 16),
+      g: parseInt(clean.substring(2, 4), 16),
+      b: parseInt(clean.substring(4, 6), 16),
+    };
+  };
+
+  const colorDistance = (c1, c2) => {
+    return Math.sqrt(
+      Math.pow(c1.r - c2.r, 2) +
+      Math.pow(c1.g - c2.g, 2) +
+      Math.pow(c1.b - c2.b, 2)
+    );
+  };
+
+  const isColorClose = (itemColor, paletteColors, threshold = 60) => {
+    const rgb1 = hexToRgb(itemColor);
+    return paletteColors.some(palColor => {
+      const rgb2 = hexToRgb(palColor);
+      return colorDistance(rgb1, rgb2) < threshold;
+    });
   };
 
   const loadData = async () => {
     const profileKey = await AsyncStorage.getItem('seasonalColorProfile');
     const wardrobeRaw = await AsyncStorage.getItem('wardrobeItems');
     const wardrobeItems = wardrobeRaw ? JSON.parse(wardrobeRaw) : [];
-
     if (!profileKey || wardrobeItems.length === 0) {
       setShowLockModal(true);
       return;
     }
-
     const palette = profileData[profileKey]?.palette || [];
-    const keep = [];
-    const discard = [];
-
+    const keep = [], discard = [];
     wardrobeItems.forEach(item => {
-      if (palette.includes(item.dominantColor)) {
-        keep.push(item);
-      } else {
-        discard.push(item);
-      }
+      if (isColorClose(item.dominantColor, palette)) keep.push(item);
+      else discard.push(item);
     });
-
     setKeepItems(keep);
     setDiscardItems(discard);
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { loadData(); }, []);
 
   const resetWardrobe = async () => {
-    try {
-      await AsyncStorage.removeItem('wardrobeItems');
-      setKeepItems([]);
-      setDiscardItems([]);
-      setCardIndex(0);
-      setDonatedItems([]);
-      setRescuedItems([]);
-      setShowResetModal(false);
-      await loadData();
-    } catch (e) {
-      console.error('Failed to reset wardrobe', e);
-    }
+    await AsyncStorage.removeItem('wardrobeItems');
+    setKeepItems([]);
+    setDiscardItems([]);
+    setCardIndex(0);
+    setDonatedItems([]);
+    setRescuedItems([]);
+    setShowResetModal(false);
+    await loadData();
   };
 
   const renderFullscreen = () => {
