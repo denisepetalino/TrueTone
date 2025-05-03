@@ -1,166 +1,171 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Dimensions, ScrollView, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Dimensions, ScrollView, Image, Modal } from 'react-native';
 import Navbar from '../components/Navbar';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
+const profiles = [
+  'Light Spring', 'Warm Spring', 'Bright Spring',
+  'Light Summer', 'Cool Summer', 'Soft Summer',
+  'Warm Autumn', 'Deep Autumn', 'Soft Autumn',
+  'Cool Winter', 'Deep Winter', 'Bright Winter'
+];
+
 const questions = [
   {
     id: 1,
-    factor: 'undertone',
-    question: 'What jewellery suits you best?',
-    options: ['Silver', 'Gold', 'Both equally'],
+    question: 'Which jewellery flatters your skin tone most?',
+    options: [
+      { text: 'Silver, I look fresh and clear', scores: { 'Cool Summer': 2, 'Cool Winter': 2, 'Bright Winter': 1 } },
+      { text: 'Gold, I glow in it', scores: { 'Warm Spring': 2, 'Warm Autumn': 2, 'Light Spring': 1 } },
+      { text: 'Both, but silver slightly more', scores: { 'Soft Summer': 1, 'Cool Summer': 1, 'Deep Winter': 1 } },
+      { text: 'Both, but gold slightly more', scores: { 'Soft Autumn': 1, 'Light Spring': 1, 'Deep Autumn': 1 } },
+    ],
     image: require('../assets/images/quiz/silvergold.png'),
   },
   {
     id: 2,
-    factor: 'undertone',
     question: 'What colour are the veins on your wrist?',
-    options: ['Blue/Purple', 'Greenish', 'Can’t tell'],
+    options: [
+      { text: 'Blue or purple', scores: { 'Cool Summer': 2, 'Cool Winter': 2, 'Light Summer': 1 } },
+      { text: 'Green or olive', scores: { 'Warm Autumn': 2, 'Warm Spring': 2, 'Light Spring': 1 } },
+      { text: 'Hard to tell / mix of both', scores: { 'Soft Summer': 2, 'Soft Autumn': 2 } },
+    ],
     image: require('../assets/images/quiz/veins.jpg'),
   },
   {
     id: 3,
-    factor: 'undertone',
-    question: 'How does your skin react to the sun?',
-    options: ['Burns easily, barely tans', 'Tans easily, rarely burns', 'Burns and tans'],
+    question: 'How does your skin react to sun exposure?',
+    options: [
+      { text: 'Burns quickly, hardly tans', scores: { 'Cool Summer': 2, 'Light Summer': 2, 'Bright Winter': 1 } },
+      { text: 'Tans easily, rarely burns', scores: { 'Warm Autumn': 2, 'Deep Autumn': 2, 'Warm Spring': 1 } },
+      { text: 'Burns then tans gradually', scores: { 'Soft Summer': 1, 'Light Spring': 1, 'Soft Autumn': 1 } },
+    ],
     image: require('../assets/images/quiz/sunburntan.png'),
   },
   {
     id: 4,
-    factor: 'contrast',
-    question: 'Is there a strong contrast between your hair, eyes, and skin?',
-    options: ['Yes, high contrast', 'No, everything blends softly'],
+    question: 'How much contrast is there between your hair, eyes, and skin?',
+    options: [
+      { text: 'High: e.g., dark hair and light skin/eyes', scores: { 'Bright Winter': 2, 'Deep Winter': 2, 'Bright Spring': 1 } },
+      { text: 'Medium: some contrast but not sharp', scores: { 'Cool Summer': 1, 'Warm Autumn': 1, 'Deep Autumn': 1 } },
+      { text: 'Low: everything blends softly', scores: { 'Soft Autumn': 2, 'Soft Summer': 2 } },
+    ],
     image: require('../assets/images/quiz/contrast.png'),
   },
   {
     id: 5,
-    factor: 'contrast',
-    question: 'Which describes your natural hair and eye combo?',
-    options: ['Dark hair + light eyes', 'Light hair + light eyes', 'Dark hair + dark eyes', 'Light hair + dark eyes'],
+    question: 'Pick the combination closest to your natural hair and eye colour:',
+    options: [
+      { text: 'Light hair + light eyes', scores: { 'Light Spring': 2, 'Light Summer': 2 } },
+      { text: 'Dark hair + light eyes', scores: { 'Bright Winter': 2, 'Bright Spring': 2 } },
+      { text: 'Dark hair + dark eyes', scores: { 'Deep Autumn': 2, 'Deep Winter': 2 } },
+      { text: 'Light hair + dark eyes', scores: { 'Warm Spring': 1, 'Soft Autumn': 1 } },
+    ],
     image: require('../assets/images/quiz/darklight.png'),
   },
   {
     id: 6,
-    factor: 'contrast',
-    question: 'Do bold, high-contrast outfits suit you better?',
-    options: ['Yes, I stand out', 'No, softer blends feel better'],
+    question: 'Do bold, high-contrast outfits suit you?',
+    options: [
+      { text: 'Yes, I thrive in bold colours', scores: { 'Bright Winter': 2, 'Bright Spring': 2 } },
+      { text: 'Sometimes, but soft blends look better', scores: { 'Soft Summer': 2, 'Soft Autumn': 2 } },
+      { text: 'No, they overwhelm me', scores: { 'Light Spring': 1, 'Light Summer': 1 } },
+    ],
     image: require('../assets/images/quiz/contrastoutfits.png'),
   },
   {
     id: 7,
-    factor: 'clarity',
-    question: 'How do high-saturation colours (e.g., cobalt blue, emerald green) look on you?',
-    options: ['They make me glow!', 'A bit too loud, I prefer toned-down colours', 'They’re okay, but deeper tones suit me better', 'I avoid them, lighter colours are more flattering'],
+    question: 'How do vivid, high-saturation colours look on you?',
+    options: [
+      { text: 'They make me glow!', scores: { 'Bright Spring': 2, 'Bright Winter': 2 } },
+      { text: 'A bit too loud, I prefer toned-down colours', scores: { 'Soft Summer': 2, 'Soft Autumn': 2 } },
+      { text: 'I prefer richer, deeper tones', scores: { 'Deep Autumn': 2, 'Deep Winter': 2 } },
+      { text: 'I like light, soft colours more', scores: { 'Light Summer': 1, 'Light Spring': 1 } },
+    ],
     image: require('../assets/images/quiz/bluegreen.png'),
   },
   {
     id: 8,
-    factor: 'clarity',
-    question: 'When wearing soft, dusty shades (e.g., sage green, dusty rose), your skin looks…',
-    options: ['Washed out or dull', 'Harmonious, natural', 'Okay, but not my best', 'Even brighter or fresher'],
+    question: 'How do dusty shades (like sage or dusty rose) affect your skin?',
+    options: [
+      { text: 'They wash me out or dull my features', scores: { 'Bright Spring': 2, 'Bright Winter': 2 } },
+      { text: 'They harmonise beautifully with my tone', scores: { 'Soft Summer': 2, 'Soft Autumn': 2 } },
+      { text: 'They’re okay but not my best', scores: { 'Cool Summer': 1, 'Warm Autumn': 1 } },
+      { text: 'They brighten me up', scores: { 'Light Spring': 1, 'Light Summer': 1 } },
+    ],
     image: require('../assets/images/quiz/sagerose.png'),
   },
   {
     id: 9,
-    factor: 'clarity',
-    question: 'Dark, rich colours (e.g., black, burgundy) make your features look…',
-    options: ['Sharp and defined', 'A little harsh, prefer medium shades', 'Overpowering, I stick to lighter tones', 'They work, but I shine more in vibrant brights'],
+    question: 'How do dark colours (like black or burgundy) affect your look?',
+    options: [
+      { text: 'Make my features pop, I look sharp', scores: { 'Deep Winter': 2, 'Deep Autumn': 2 } },
+      { text: 'Too strong, I prefer softer midtones', scores: { 'Soft Summer': 2, 'Soft Autumn': 2 } },
+      { text: 'They’re overpowering; I go for light colours', scores: { 'Light Spring': 1, 'Light Summer': 1 } },
+      { text: 'They’re okay but vibrant brights suit me better', scores: { 'Bright Spring': 2, 'Bright Winter': 2 } },
+    ],
     image: require('../assets/images/quiz/blackburgundy.png'),
   },
   {
     id: 10,
-    factor: 'clarity',
-    question: 'Pastel colours (e.g., baby pink, sky blue) make your complexion…',
-    options: ['Glow, they flatter me', 'Look bland, I need more intensity', 'Feel soft and calm, I like them', 'Uneven, I avoid them'],
+    question: 'What effect do pastel colours (like baby pink or sky blue) have on you?',
+    options: [
+      { text: 'They flatter me and make my skin glow', scores: { 'Light Spring': 2, 'Light Summer': 2 } },
+      { text: 'They feel bland, I need more intensity', scores: { 'Bright Winter': 2, 'Deep Autumn': 1 } },
+      { text: 'They feel gentle and calm, I like them', scores: { 'Soft Summer': 1, 'Soft Autumn': 1 } },
+      { text: 'They’re not great, I prefer richer tones', scores: { 'Deep Winter': 1, 'Warm Autumn': 1 } },
+    ],
     image: require('../assets/images/quiz/pinkblue.png'),
   },
   {
     id: 11,
-    factor: 'clarity',
-    question: 'Which of these patterns do you gravitate towards?',
-    options: ['Crisp, high-contrast patterns (e.g., stripes, bold prints)', 'Soft, blended patterns (e.g., watercolor florals)', 'Strong, deep-toned patterns (e.g., paisley in jewel tones)', 'Light, airy patterns (e.g., small florals in pastel tones)'],
+    question: 'Which pattern type are you drawn to most?',
+    options: [
+      { text: 'Bold, high-contrast (e.g., stripes, graphic prints)', scores: { 'Bright Winter': 2, 'Bright Spring': 2 } },
+      { text: 'Soft, watercolour blends', scores: { 'Soft Summer': 2, 'Soft Autumn': 2 } },
+      { text: 'Rich, deep jewel-tone prints (e.g., paisley)', scores: { 'Deep Autumn': 2, 'Deep Winter': 2 } },
+      { text: 'Light and delicate florals', scores: { 'Light Summer': 2, 'Light Spring': 2 } },
+    ],
     image: require('../assets/images/quiz/patterns.png'),
   },
 ];
 
 const QuizScreen = () => {
   const [answers, setAnswers] = useState({});
+  const [modalVisible, setModalVisible] = useState(false);
+  const [resultProfile, setResultProfile] = useState(null);
   const navigation = useNavigation();
 
-  const handleSelect = (questionId, option) => {
-    setAnswers({ ...answers, [questionId]: option });
+  const handleSelect = (questionId, optionText) => {
+    setAnswers({ ...answers, [questionId]: optionText });
   };
 
   const calculateScore = async () => {
-    let undertoneScore = 0;
-    let contrastScore = 0;
-    let clarityScore = 0;
+    const profileScores = Object.fromEntries(profiles.map((p) => [p, 0]));
 
     questions.forEach((q) => {
-      const answer = answers[q.id];
-      if (!answer) return;
+      const selectedText = answers[q.id];
+      if (!selectedText) return;
+      const selectedOption = q.options.find(opt => opt.text === selectedText);
+      if (!selectedOption) return;
 
-      if (q.factor === 'undertone') {
-        if (['Silver', 'Blue/Purple', 'Burns easily, barely tans'].includes(answer)) {
-          undertoneScore += 1;
-        } else if (['Gold', 'Greenish', 'Tans easily, rarely burns'].includes(answer)) {
-          undertoneScore -= 1;
-        }
-      } else if (q.factor === 'contrast') {
-        if (['Yes, high contrast', 'Dark hair + light eyes', 'Yes, I stand out', 'Dark hair + dark eyes'].includes(answer)) {
-          contrastScore += 1;
-        } else {
-          contrastScore -= 1;
-        }
-      } else if (q.factor === 'clarity') {
-        if (
-          ['They make me glow!', 'Washed out or dull', 'Sharp and defined', 'Glow, they flatter me'].includes(answer) ||
-          answer.includes('high-contrast patterns')
-        ) {
-          clarityScore += 2;
-        } else if (
-          ['A bit too loud, I prefer toned-down colours', 'Harmonious, natural', 'A little harsh, prefer medium shades', 'Feel soft and calm, I like them'].includes(answer) ||
-          answer.includes('blended patterns')
-        ) {
-          clarityScore -= 2;
-        } else if (answer.includes('deeper tones') || answer.includes('deep-toned patterns')) {
-          clarityScore += 1;
-        } else if (answer.includes('lighter colours') || answer.includes('light, airy patterns')) {
-          clarityScore -= 1;
-        }
-      }
+      Object.entries(selectedOption.scores).forEach(([profile, value]) => {
+        profileScores[profile] += value;
+      });
     });
 
-    let result = '';
-    if (undertoneScore > 0 && contrastScore > 0 && clarityScore >= 2) result = 'Clear Winter';
-    else if (undertoneScore > 0 && contrastScore > 0 && clarityScore <= -1) result = 'Deep Winter';
-    else if (undertoneScore > 0 && contrastScore > 0) result = 'Cool Winter';
+    const topProfile = Object.entries(profileScores).sort((a, b) => b[1] - a[1])[0][0];
+    setResultProfile(topProfile);
+    setModalVisible(true);
+  };
 
-    else if (undertoneScore > 0 && contrastScore < 0 && clarityScore >= 2) result = 'Light Summer';
-    else if (undertoneScore > 0 && contrastScore < 0 && clarityScore <= -1) result = 'Soft Summer';
-    else if (undertoneScore > 0 && contrastScore < 0) result = 'Cool Summer';
-
-    else if (undertoneScore < 0 && contrastScore > 0 && clarityScore >= 2) result = 'Soft Autumn';
-    else if (undertoneScore < 0 && contrastScore > 0 && clarityScore <= -1) result = 'Deep Autumn';
-    else if (undertoneScore < 0 && contrastScore > 0) result = 'Warm Autumn';
-
-    else if (undertoneScore < 0 && contrastScore < 0 && clarityScore >= 2) result = 'Clear Spring';
-    else if (undertoneScore < 0 && contrastScore < 0 && clarityScore <= -1) result = 'Light Spring';
-    else if (undertoneScore < 0 && contrastScore < 0) result = 'Warm Spring';
-
-    else result = 'Neutral';
-
-    try {
-      await AsyncStorage.setItem('seasonalColorProfile', result);
-      Alert.alert('Profile Saved!', `You are a ${result}.`, [
-        { text: 'View Result', onPress: () => navigation.navigate('Profile', { result }) }
-      ]);
-    } catch (e) {
-      console.error('Failed to save result:', e);
-    }
+  const handleViewResult = async () => {
+    setModalVisible(false);
+    await AsyncStorage.setItem('seasonalColorProfile', resultProfile);
+    navigation.navigate('Profile', { result: resultProfile });
   };
 
   return (
@@ -172,11 +177,11 @@ const QuizScreen = () => {
             <Text style={styles.questionText}>{q.question}</Text>
             {q.options.map((option) => (
               <TouchableOpacity
-                key={option}
-                style={[styles.optionButton, answers[q.id] === option && styles.selectedOption]}
-                onPress={() => handleSelect(q.id, option)}
+                key={option.text}
+                style={[styles.optionButton, answers[q.id] === option.text && styles.selectedOption]}
+                onPress={() => handleSelect(q.id, option.text)}
               >
-                <Text style={styles.optionText}>{option}</Text>
+                <Text style={styles.optionText}>{option.text}</Text>
               </TouchableOpacity>
             ))}
           </View>
@@ -185,6 +190,18 @@ const QuizScreen = () => {
           <Text style={styles.submitButtonText}>See My Colour Profile</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <Modal visible={modalVisible} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.questionText}>You are a {resultProfile}!</Text>
+            <TouchableOpacity style={styles.submitButton} onPress={handleViewResult}>
+              <Text style={styles.submitButtonText}>View My Result</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <SafeAreaView style={styles.navbarWrapper}>
         <Navbar />
       </SafeAreaView>
@@ -193,14 +210,8 @@ const QuizScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FCE4EC',
-  },
-  scrollContainer: {
-    padding: 20,
-    paddingBottom: 100,
-  },
+  container: { flex: 1, backgroundColor: '#FCE4EC' },
+  scrollContainer: { padding: 20, paddingBottom: 100 },
   questionBox: {
     backgroundColor: '#FFFFFF',
     borderRadius: 15,
@@ -258,6 +269,22 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+  },
+  modalOverlay: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999,
+  },
+  modalContent: {
+    backgroundColor: '#FFF',
+    borderRadius: 20,
+    padding: 30,
+    alignItems: 'center',
+    borderColor: '#DB7C87',
+    borderWidth: 2,
   },
 });
 
