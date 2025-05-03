@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
+  Modal,
   Alert,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
@@ -19,17 +20,19 @@ const { width, height } = Dimensions.get('window');
 const UploadScreen = () => {
   const [imageUri, setImageUri] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [savedModalVisible, setSavedModalVisible] = useState(false);
+  const [savedItemColor, setSavedItemColor] = useState(null);
 
   const cloudName = 'dw7qc0ug0';
   const uploadPreset = 'truetone_uploads';
 
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted){
+    if (!permission.granted) {
       Alert.alert(
-        "Permission Required",
-        "Allow access to your photo library to upload images?",
-        [{text: `OK`}]
+        'Permission Required',
+        'Allow access to your photo library to upload images?',
+        [{ text: 'OK' }]
       );
       return;
     }
@@ -48,11 +51,11 @@ const UploadScreen = () => {
 
   const takePhoto = async () => {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
-    if (!permission.granted){
+    if (!permission.granted) {
       Alert.alert(
-        "Permission Required",
-        "Allow access to your camera to upload images?",
-        [{text: `OK`}]
+        'Permission Required',
+        'Allow access to your camera to upload images?',
+        [{ text: 'OK' }]
       );
       return;
     }
@@ -119,8 +122,9 @@ const UploadScreen = () => {
       const updatedItems = [...parsed, newItem];
       await AsyncStorage.setItem('wardrobeItems', JSON.stringify(updatedItems));
 
-      Alert.alert('Saved!', `Item added to your wardrobe.\nDetected colour: ${result.dominantColor}`);
-      setImageUri(null); 
+      setSavedItemColor(result.dominantColor);
+      setSavedModalVisible(true);
+      setImageUri(null);
     } catch (error) {
       console.error('Failed to save item:', error);
     } finally {
@@ -137,11 +141,11 @@ const UploadScreen = () => {
           <Image source={require('../assets/images/hellokittycamera.png')} style={styles.camera} />
           <Text style={styles.headingtext}>UPLOAD HERE!</Text>
           <Text style={styles.subtext}>
-            1. use bright lighting {'\n'}
-            2. avoid harsh shadows {'\n'}
-            3. use a white background {'\n'}
-            4. lay the item flat {'\n'}
-            5. ensure the item fills the majority of the frame {'\n'}
+            1. use bright lighting{'\n'}
+            2. avoid harsh shadows{'\n'}
+            3. use a white background{'\n'}
+            4. lay the item flat{'\n'}
+            5. ensure the item fills the majority of the frame{'\n'}
           </Text>
 
           <TouchableOpacity style={styles.button} onPress={takePhoto}>
@@ -166,6 +170,28 @@ const UploadScreen = () => {
       <SafeAreaView style={styles.navbarWrapper}>
         <Navbar />
       </SafeAreaView>
+
+      {/* 🎨 Saved Modal */}
+      <Modal
+        visible={savedModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSavedModalVisible(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Saved to Wardrobe!</Text>
+            <Text style={styles.modalText}>Detected Colour:</Text>
+            <View style={[styles.colorSwatch, { backgroundColor: savedItemColor || '#ccc' }]} />
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: '#DB7C87' }]}
+              onPress={() => setSavedModalVisible(false)}
+            >
+              <Text style={styles.modalButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -244,6 +270,55 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBox: {
+    backgroundColor: 'white',
+    padding: 25,
+    borderRadius: 20,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontFamily: 'HammersmithOne',
+    marginBottom: 10,
+    color: '#DB7C87',
+    textAlign: 'center',
+  },
+  modalText: {
+    fontSize: 16,
+    fontFamily: 'Quicksand-Regular',
+    textAlign: 'center',
+    color: '#444',
+    marginBottom: 10,
+  },
+  modalButton: {
+    backgroundColor: '#EFB0B7',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 15,
+    marginTop: 10,
+    width: '100%',
+  },
+  modalButtonText: {
+    fontSize: 16,
+    color: 'white',
+    textAlign: 'center',
+    fontFamily: 'HammersmithOne',
+  },
+  colorSwatch: {
+    width: 60,
+    height: 60,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#888',
+    marginVertical: 10,
   },
 });
 
