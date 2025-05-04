@@ -7,6 +7,11 @@ import Navbar from '../components/Navbar';
 import { useFocusEffect } from '@react-navigation/native';
 import profileData from '../data/profileData';
 import Text from '../components/CustomText';
+import Animated, {
+  FadeInDown,
+  FadeInUp,
+  ZoomIn,
+} from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
 
@@ -72,7 +77,9 @@ const ProfileScreen = () => {
 
         <View style={styles.resultContainer}>
           <Text style={styles.title}>You are a</Text>
-          <Text style={styles.result}>{result.toUpperCase()}!</Text>
+          <Animated.View entering={ZoomIn}>
+            <Text style={styles.result}>{result.toUpperCase()}!</Text>
+          </Animated.View>
           <Image source={require('../assets/images/mymelody.jpg')} style={styles.resultimg} />
 
           <Text style={styles.indicatorLabel}>WARM/COOL TONE</Text>
@@ -97,12 +104,12 @@ const ProfileScreen = () => {
             <Image source={require('../assets/images/heartslider.png')} style={[styles.heartImage, { left: `${profile.depth * 100}%` }]} />
           </View>
 
-          <View style={styles.descriptionBox}>
+          <Animated.View entering={FadeInDown} style={styles.descriptionBox}>
             <Text style={styles.description}>{profile.description}</Text>
-          </View>
+          </Animated.View>
 
           <Text style={styles.subheading}>COLOURS THAT SUIT YOU:</Text>
-          <View style={styles.paletteContainer}>
+          <View entering={FadeInDown} style={styles.paletteContainer}>
             {profile.palette.map((color, index) => (
               <View key={index} style={[styles.colorCircle, { backgroundColor: color }]} />
             ))}
