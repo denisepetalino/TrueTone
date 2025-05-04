@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Dimensions, Scr
 import Navbar from '../components/Navbar';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import ConfettiCannon from 'react-native-confetti-cannon';
 const { width } = Dimensions.get('window');
 
 const profiles = [
@@ -198,6 +198,12 @@ const QuizScreen = () => {
             <TouchableOpacity style={styles.submitButton} onPress={handleViewResult}>
               <Text style={styles.submitButtonText}>View My Result</Text>
             </TouchableOpacity>
+            <ConfettiCannon
+              count={800}
+              origin={{x:0,y:0}}
+              fadeOut={true}
+              fallSpeed={2000}
+            />
           </View>
         </View>
       </Modal>
