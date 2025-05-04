@@ -7,10 +7,12 @@ import {
   SafeAreaView,
   ScrollView,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
+  Platform,
 } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import * as Location from 'expo-location';
+import { Linking } from 'react-native';
 import Navbar from '../components/Navbar';
 
 const { width, height } = Dimensions.get('window');
@@ -29,6 +31,8 @@ const NearbyCharitiesScreen = () => {
         `https://api.geoapify.com/v2/places?categories=office.charity&filter=circle:${longitude},${latitude},5000&bias=proximity:${longitude},${latitude}&limit=10&apiKey=ddfd6258ff2e4ab9848d1d59af84ae4b`
       );
       const data = await response.json();
+      console.log(JSON.stringify(data.features, null,2));
+
       if (Array.isArray(data.features)) {
         setCharities(data.features);
       } else {
@@ -58,6 +62,21 @@ const NearbyCharitiesScreen = () => {
       longitudeDelta: 0.05,
     });
     fetchNearbyCharities(latitude, longitude);
+  };
+
+  const openDirections = (lat, lon, mode = 'driving') => {
+    let url;
+    if (Platform.OS === 'ios') {
+      let appleMode = mode === 'walking' ? 'w' : mode === 'driving' ? 'd' : 'r';
+      // Note: Apple Maps does not support cycling directions explicitly
+      if (mode === 'bicycling') {
+        appleMode = 'w'; // fallback to walking
+      }
+      url = `http://maps.apple.com/?daddr=${lat},${lon}&dirflg=${appleMode}`;
+    } else {
+      url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&travelmode=${mode}`;
+    }
+    Linking.openURL(url);
   };
 
   useEffect(() => {
@@ -104,7 +123,7 @@ const NearbyCharitiesScreen = () => {
                 >
                   <Callout>
                     <View>
-                      <Text style={{ fontWeight: 'bold' }}>{c.properties.name}</Text>
+                      <Text style={{ fontWeight: 'bold' }}>{c.properties.name || 'Charity'}</Text>
                       <Text>{c.properties.address_line1}</Text>
                     </View>
                   </Callout>
@@ -121,15 +140,30 @@ const NearbyCharitiesScreen = () => {
           ) : charities.length > 0 ? (
             charities.map((c, idx) => {
               const isSelected = selectedCharityIndex === idx;
+              const lat = c.geometry.coordinates[1];
+              const lon = c.geometry.coordinates[0];
+              const name = c.properties.name || 'Charity';
               return (
-                <TouchableOpacity
-                  key={idx}
-                  style={[styles.charityCard, isSelected && styles.charityCardSelected]}
-                  onPress={() => handleSelectCharity(idx)}
-                >
-                  <Text style={[styles.charityName, isSelected && styles.charityNameSelected]}>{c.properties.name}</Text>
-                  <Text style={[styles.charityAddress, isSelected && styles.charityAddressSelected]}>{c.properties.address_line1}</Text>
-                </TouchableOpacity>
+                <View key={idx}>
+                  <TouchableOpacity
+                    style={[styles.charityCard, isSelected && styles.charityCardSelected]}
+                    onPress={() => handleSelectCharity(idx)}
+                  >
+                    <Text style={[styles.charityName, isSelected && styles.charityNameSelected]}>{name}</Text>
+                    <Text style={[styles.charityAddress, isSelected && styles.charityAddressSelected]}>{c.properties.address_line1}</Text>
+                  </TouchableOpacity>
+                  {isSelected && (
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 10 }}>
+                      <TouchableOpacity onPress={() => openDirections(lat, lon, 'driving')} style={styles.directionsButton}>
+                        <Text style={styles.directionsButtonText}>Drive</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => openDirections(lat, lon, 'walking')} style={styles.directionsButton}>
+                        <Text style={styles.directionsButtonText}>Walk</Text>
+                      </TouchableOpacity>
+                      {Platform.OS === 'android' && $1}
+                    </View>
+                  )}
+                </View>
               );
             })
           ) : (
@@ -203,6 +237,16 @@ const styles = StyleSheet.create({
   },
   charityAddressSelected: {
     color: '#fff',
+  },
+  directionsButton: {
+    backgroundColor: '#DB7C87',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+  },
+  directionsButtonText: {
+    color: 'white',
+    fontFamily: 'HammersmithOne',
   },
   sectionTitle: {
     fontSize: 24,
