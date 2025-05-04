@@ -33,6 +33,14 @@ const WardrobeScreen = ({ navigation }) => {
   const currentItemRef = useRef(null);
   const bufferedKeeps = useRef([]);
   const bufferedDonations = useRef([]);
+  const swipeQueueRef = useRef([]);
+
+  useEffect(() => {
+    if (swipeQueue.length > 0) {
+      currentItemRef.current = swipeQueue[0];
+      console.log('🧷 currentItemRef set from useEffect:', currentItemRef.current);
+    }
+  }, [swipeQueue]);
 
   const position = useRef(new Animated.ValueXY()).current;
 
@@ -113,10 +121,12 @@ const WardrobeScreen = ({ navigation }) => {
   
         if (gesture.dx > SWIPE_THRESHOLD) {
           console.log('👉 Swipe detected RIGHT');
-          handleSwipe('right', current);
+          console.log(' Passing item to handleswipe', current);
+          handleSwipe('right', current, swipeQueue);
         } else if (gesture.dx < -SWIPE_THRESHOLD) {
           console.log('👈 Swipe detected LEFT');
-          handleSwipe('left', current);
+          console.log(' Passing item to handleswipe', current);
+          handleSwipe('left', current, swipeQueue);
         } else {
           console.log('❌ Swipe cancelled (threshold not reached)');
           Animated.spring(position, {
@@ -136,34 +146,30 @@ const WardrobeScreen = ({ navigation }) => {
   
     console.log('🌀 SWIPE:', direction);
     console.log('📌 Current item:', item);
-    console.log('📊 swipeQueue before:', swipeQueue);
+    console.log('📊 swipeQueue before:', swipeQueueRef.current);
   
-    Animated.timing(position, {
-      toValue: { x: direction === 'right' ? width : -width, y: 0 },
-      duration: 250,
-      useNativeDriver: true,
-    }).start(() => {
-      const updatedQueue = swipeQueue.slice(1);
+    const updatedQueue = swipeQueueRef.current.slice(1);
+    swipeQueueRef.current = updatedQueue;
+    setSwipeQueue(updatedQueue); // 💥 trigger useEffect/render
   
-      if (direction === 'right') {
-        bufferedDonations.current.push(item);
-      } else {
-        bufferedKeeps.current.push(item);
-      }
+    console.log('🧹 swipeQueue after:', updatedQueue);
   
-      console.log('🧹 swipeQueue after:', updatedQueue);
-      console.log('➕ bufferedKeeps:', bufferedKeeps.current);
-      console.log('➕ bufferedDonations:', bufferedDonations.current);
+    if (direction === 'right') {
+      bufferedDonations.current.push(item);
+    } else {
+      bufferedKeeps.current.push(item);
+    }
   
-      setSwipeQueue(updatedQueue);
-      position.setValue({ x: 0, y: 0 });
+    console.log('➕ bufferedKeeps:', bufferedKeeps.current);
+    console.log('➕ bufferedDonations:', bufferedDonations.current);
   
-      if (updatedQueue.length === 0) {
-        console.log('✅ Queue empty. Auto-closing and committing...');
-        commitSwipeResults();
-        setFullscreenActive(false);
-      }
-    });
+    position.setValue({ x: 0, y: 0 });
+  
+    if (updatedQueue.length === 0) {
+      console.log('✅ Queue empty. Auto-closing and committing...');
+      commitSwipeResults();
+      setFullscreenActive(false);
+    }
   };
 
   const commitSwipeResults = () => {
@@ -194,9 +200,9 @@ const WardrobeScreen = ({ navigation }) => {
 
     console.log('🧮 Current index:', cardIndex, 'Items:', discardItems.length);
   
-    const current = swipeQueue[0];
-    console.log('🖼️ RENDERING ITEM IN FULLSCREEN:', current);
+    const current = swipeQueueRef.current[0];
     currentItemRef.current = current;
+    console.log('🖼️ RENDERING ITEM IN FULLSCREEN:', current);
     if (!current) return null;
   
   
@@ -245,7 +251,7 @@ const WardrobeScreen = ({ navigation }) => {
           <Image source={{ uri: current.uri }} style={styles.fullscreenImage} />
           <View style={styles.itemCounter}>
             <Text style={styles.counterText}>
-              {cardIndex + 1}/{discardItems.length}
+              {discardItems.length - swipeQueueRef.current.length +1}/{discardItems.length}
             </Text>
           </View>
         </Animated.View>
@@ -300,9 +306,9 @@ const WardrobeScreen = ({ navigation }) => {
           )}
           {discardItems.length > 0 && (
             <TouchableOpacity onPress={() => {
-              console.log('OPENING FULLSCREEN');
-              console.log('swipeQueue:', discardItems);
-              setSwipeQueue(discardItems);
+              console.log('LOG  OPENING FULLSCREEN');
+              swipeQueueRef.current = [...discardItems];
+              console.log('swipeQueueRef set: ', swipeQueueRef.current);
               bufferedKeeps.current = [];
               bufferedDonations.current = [];
               setFullscreenActive(true);
