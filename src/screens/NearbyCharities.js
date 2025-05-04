@@ -9,6 +9,7 @@ import {
   Image,
   TouchableOpacity,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import * as Location from 'expo-location';
@@ -67,9 +68,8 @@ const NearbyCharitiesScreen = () => {
     let url;
     if (Platform.OS === 'ios') {
       let appleMode = mode === 'walking' ? 'w' : mode === 'driving' ? 'd' : 'r';
-      // Note: Apple Maps does not support cycling directions explicitly
       if (mode === 'bicycling') {
-        appleMode = 'w'; // fallback to walking
+        appleMode = 'w';
       }
       url = `http://maps.apple.com/?daddr=${lat},${lon}&dirflg=${appleMode}`;
     } else {
@@ -135,7 +135,9 @@ const NearbyCharitiesScreen = () => {
         <View style={styles.charityList}>
           <Text style={styles.sectionTitle}>NEARBY CHARITIES</Text>
           {loading ? (
-            <Text style={styles.emptyText}>Loading nearby charities...</Text>
+            <View style={{ alignItems: 'center', padding: 20 }}>
+              <ActivityIndicator size="large" color="#DB7C87" />
+            </View>
           ) : charities.length > 0 ? (
             charities.map((c, idx) => {
               const isSelected = selectedCharityIndex === idx;
@@ -159,7 +161,11 @@ const NearbyCharitiesScreen = () => {
                       <TouchableOpacity onPress={() => openDirections(lat, lon, 'walking')} style={styles.directionsButton}>
                         <Text style={styles.directionsButtonText}>Walk</Text>
                       </TouchableOpacity>
-                      {Platform.OS === 'android' && $1}
+                      {Platform.OS === 'android' && (
+                        <TouchableOpacity onPress={() => openDirections(lat, lon, 'bicycling')} style={styles.directionsButton}>
+                          <Text style={styles.directionsButtonText}>Cycle</Text>
+                        </TouchableOpacity>
+                      )}
                     </View>
                   )}
                 </View>

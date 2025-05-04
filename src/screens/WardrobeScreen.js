@@ -118,30 +118,47 @@ const WardrobeScreen = ({ navigation }) => {
   const handleSwipe = (direction) => {
     const current = discardItems[cardIndex];
     if (!current) return;
+    
+    console.log('🌀 SWIPE TRIGGERED:', direction);
+    console.log('🌀 CURRENT ITEM:', current);
 
     Animated.timing(position, {
       toValue: { x: direction === 'right' ? width : -width, y: 0 },
       duration: 250,
       useNativeDriver: true,
     }).start(() => {
-      const updatedDiscard = [...discardItems];
-      updatedDiscard.splice(cardIndex, 1);
-
       if (direction === 'right') {
         setDonatedItems(prev => [...prev, current]);
       } else {
         setKeepItems(prev => [...prev, current]);
       }
 
+      const updatedDiscard = discardItems.filter((_, index) => index !== cardIndex);
+      console.log('📤 UPDATED DISCARD:', updatedDiscard);
       setDiscardItems(updatedDiscard);
-      setCardIndex(prev => Math.min(prev, updatedDiscard.length - 1));
+
       position.setValue({ x: 0, y: 0 });
+
+      if (updatedDiscard.length === 0) {
+        console.log('✅ No more items. Closing fullscreen.');
+        console.log('🌀 SWIPE TRIGGERED:', direction);
+        console.log('🌀 CURRENT ITEM:', current);
+        setFullscreenActive(false);
+      } else {
+        setCardIndex(prev => Math.min(prev, updatedDiscard.length-1));
+      }
     });
   };
 
   const renderFullscreen = () => {
+    if(discardItems.length===0){
+      setFullscreenActive(false);
+      return null;
+    }    
     const current = discardItems[cardIndex];
     if (!current) return null;
+    
+    console.log('🖼️ RENDERING ITEM IN FULLSCREEN:', current);
 
     const yesOpacity = position.x.interpolate({
       inputRange: [0, SWIPE_THRESHOLD],
@@ -164,6 +181,11 @@ const WardrobeScreen = ({ navigation }) => {
         </View>
         <Animated.View style={[styles.fullscreenCard, { transform: [{ translateX: position.x }] }]} {...panResponder.panHandlers}>
           <Image source={{ uri: current.uri }} style={styles.fullscreenImage} />
+          <View style={styles.itemCounter}>
+            <Text style={styles.counterText}>
+              {cardIndex+1}/{discardItems.length}
+            </Text>
+          </View>
         </Animated.View>
         <TouchableOpacity onPress={() => setFullscreenActive(false)} style={styles.closeFullscreen}>
           <Text style={styles.resetButtonText}>CLOSE</Text>
@@ -480,6 +502,20 @@ const styles = StyleSheet.create({
     color: 'white',
     textAlign: 'center',
     fontFamily: 'HammersmithOne',
+  },
+  itemCounter: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+  },
+  counterText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });
 
