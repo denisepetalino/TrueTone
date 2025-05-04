@@ -1,4 +1,4 @@
-import React, { useState, useCallback} from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, StyleSheet, SafeAreaView, TouchableOpacity, ActivityIndicator, ScrollView, Image, Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
@@ -8,9 +8,9 @@ import { useFocusEffect } from '@react-navigation/native';
 import profileData from '../data/profileData';
 import Text from '../components/CustomText';
 import Animated, {
-  FadeInDown,
-  FadeInUp,
-  ZoomIn,
+  withTiming,
+  useSharedValue,
+  useAnimatedStyle,
 } from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
@@ -19,7 +19,7 @@ const ProfileScreen = () => {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
-  
+
   useFocusEffect(
     useCallback(() => {
       const fetchResult = async () => {
@@ -37,6 +37,31 @@ const ProfileScreen = () => {
   );
 
   const profile = profileData[result];
+
+  const toneX = useSharedValue(-50);  
+  const depthX = useSharedValue(-50); 
+
+  const resultScale = useSharedValue(0);
+
+  useEffect(() => {
+    if (profile) {
+      toneX.value = withTiming(profile.tone * 100, { duration: 800 });
+      depthX.value = withTiming(profile.depth * 100, { duration: 800 });
+      resultScale.value = withTiming(1, { duration: 800 });
+    }
+  }, [profile]);
+
+  const animatedToneStyle = useAnimatedStyle(() => ({
+    left: `${toneX.value}%`,
+  }));
+
+  const animatedDepthStyle = useAnimatedStyle(() => ({
+    left: `${depthX.value}%`,
+  }));
+
+  const animatedResultStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: resultScale.value }],
+  }));
 
   if (loading) {
     return (
@@ -77,12 +102,15 @@ const ProfileScreen = () => {
 
         <View style={styles.resultContainer}>
           <Text style={styles.title}>You are a</Text>
-          <Animated.View entering={ZoomIn}>
+          
+          <Animated.View style={[animatedResultStyle]}>
             <Text style={styles.result}>{result.toUpperCase()}!</Text>
           </Animated.View>
+
           <Image source={require('../assets/images/mymelody.jpg')} style={styles.resultimg} />
 
           <Text style={styles.indicatorLabel}>WARM/COOL TONE</Text>
+          
           <View style={styles.bar}>
             <LinearGradient
               colors={['#FFA500', '#0000FF']}
@@ -90,10 +118,14 @@ const ProfileScreen = () => {
               end={{ x: 1, y: 0 }}
               style={styles.gradientBar}
             />
-            <Image source={require('../assets/images/heartslider.png')} style={[styles.heartImage, { left: `${profile.tone * 100}%` }]} />
+            <Animated.Image
+              source={require('../assets/images/heartslider.png')}
+              style={[styles.heartImage, animatedToneStyle]}
+            />
           </View>
 
           <Text style={styles.indicatorLabel}>LIGHT/DARK</Text>
+          
           <View style={styles.bar}>
             <LinearGradient
               colors={['#F5F5F5', '#333333']}
@@ -101,25 +133,30 @@ const ProfileScreen = () => {
               end={{ x: 1, y: 0 }}
               style={styles.gradientBar}
             />
-            <Image source={require('../assets/images/heartslider.png')} style={[styles.heartImage, { left: `${profile.depth * 100}%` }]} />
+            <Animated.Image
+              source={require('../assets/images/heartslider.png')}
+              style={[styles.heartImage, animatedDepthStyle]}
+            />
           </View>
 
-          <Animated.View entering={FadeInDown} style={styles.descriptionBox}>
+          <View style={styles.descriptionBox}>
             <Text style={styles.description}>{profile.description}</Text>
-          </Animated.View>
+          </View>
 
           <Text style={styles.subheading}>COLOURS THAT SUIT YOU:</Text>
-          <View entering={FadeInDown} style={styles.paletteContainer}>
+
+          <View style={styles.paletteContainer}>
             {profile.palette.map((color, index) => (
               <View key={index} style={[styles.colorCircle, { backgroundColor: color }]} />
             ))}
           </View>
+
           <TouchableOpacity style={styles.resetButton} onPress={async () => {
             await AsyncStorage.removeItem('seasonalColorProfile');
             navigation.replace('Profile');
             }}>
             <Text style={styles.resetButtonText}>RESET MY RESULTS</Text>
-        </TouchableOpacity>
+          </TouchableOpacity>
         </View>
       </ScrollView>
       <SafeAreaView style = {styles.navbarWrapper}>
