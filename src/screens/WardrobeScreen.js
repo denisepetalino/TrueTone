@@ -19,7 +19,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 
 const { width, height } = Dimensions.get('window');
 
-const SWIPE_THRESHOLD = 100;
+const SWIPE_THRESHOLD = 30;
 
 const WardrobeScreen = ({ navigation }) => {
   const [keepItems, setKeepItems] = useState([]);
@@ -34,6 +34,7 @@ const WardrobeScreen = ({ navigation }) => {
   const [finalDonatedItems, setFinalDonatedItems] = useState([]);
 
   const position = useRef(new Animated.ValueXY()).current;
+  const currentItemRef = useRef(null);
 
   const hexToRgb = hex => {
     const clean = hex.replace('#', '');
@@ -94,18 +95,30 @@ const WardrobeScreen = ({ navigation }) => {
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_, gestureState) => {
+        console.log('🤏 TOUCH DETECTED');
         return Math.abs(gestureState.dx) > 10;
       },
-      onPanResponderMove: Animated.event([
-        null,
-        { dx: position.x },
-      ], { useNativeDriver: false }),
+      onPanResponderMove: Animated.event(
+        [null, { dx: position.x }],
+        {
+          useNativeDriver: false,
+          listener: (_, gesture) => {
+            console.log('👆 MOVING:', gesture.dx);
+          },
+        }
+      ),
       onPanResponderRelease: (_, gesture) => {
+        const current = currentItemRef.current;
+        console.log('➡️ gesture.dx:', gesture.dx);
+  
         if (gesture.dx > SWIPE_THRESHOLD) {
-          handleSwipe('right');
+          console.log('👉 Swipe detected RIGHT');
+          handleSwipe('right', current);
         } else if (gesture.dx < -SWIPE_THRESHOLD) {
-          handleSwipe('left');
+          console.log('👈 Swipe detected LEFT');
+          handleSwipe('left', current);
         } else {
+          console.log('❌ Swipe cancelled (threshold not reached)');
           Animated.spring(position, {
             toValue: { x: 0, y: 0 },
             useNativeDriver: true,
@@ -115,78 +128,102 @@ const WardrobeScreen = ({ navigation }) => {
     })
   ).current;
 
-  const handleSwipe = (direction) => {
-    const current = discardItems[cardIndex];
-    if (!current) return;
-    
+  const handleSwipe = (direction, item) => {
+    if (!item){
+      console.log('No item passed to handleSwipe.');
+      return;
+    }
     console.log('🌀 SWIPE TRIGGERED:', direction);
-    console.log('🌀 CURRENT ITEM:', current);
+    console.log('🌀 CURRENT ITEM:', item);
 
     Animated.timing(position, {
       toValue: { x: direction === 'right' ? width : -width, y: 0 },
       duration: 250,
       useNativeDriver: true,
     }).start(() => {
+      const updatedDiscard = discardItems.filter(i => i.uri !== item.uri);
+
       if (direction === 'right') {
-        setDonatedItems(prev => [...prev, current]);
+        setDonatedItems(prev => [...prev, item]);
       } else {
-        setKeepItems(prev => [...prev, current]);
+        setKeepItems(prev => [...prev, item]);
       }
 
-      const updatedDiscard = discardItems.filter((_, index) => index !== cardIndex);
       console.log('📤 UPDATED DISCARD:', updatedDiscard);
       setDiscardItems(updatedDiscard);
-
       position.setValue({ x: 0, y: 0 });
 
       if (updatedDiscard.length === 0) {
         console.log('✅ No more items. Closing fullscreen.');
-        console.log('🌀 SWIPE TRIGGERED:', direction);
-        console.log('🌀 CURRENT ITEM:', current);
         setFullscreenActive(false);
-      } else {
-        setCardIndex(prev => Math.min(prev, updatedDiscard.length-1));
       }
     });
   };
 
   const renderFullscreen = () => {
-    if(discardItems.length===0){
+    if (discardItems.length === 0) {
       setFullscreenActive(false);
       return null;
-    }    
-    const current = discardItems[cardIndex];
-    if (!current) return null;
-    
-    console.log('🖼️ RENDERING ITEM IN FULLSCREEN:', current);
+    }
 
+    console.log('🧮 Current index:', cardIndex, 'Items:', discardItems.length);
+  
+    const current = discardItems[0];
+    currentItemRef.current = current;
+    if (!current) return null;
+  
+    console.log('🖼️ RENDERING ITEM IN FULLSCREEN:', current);
+  
     const yesOpacity = position.x.interpolate({
       inputRange: [0, SWIPE_THRESHOLD],
       outputRange: [0, 1],
       extrapolate: 'clamp',
     });
-
+  
     const noOpacity = position.x.interpolate({
       inputRange: [-SWIPE_THRESHOLD, 0],
       outputRange: [1, 0],
       extrapolate: 'clamp',
     });
-
+  
+    const rotate = position.x.interpolate({
+      inputRange: [-width / 2, 0, width / 2],
+      outputRange: ['-10deg', '0deg', '10deg'],
+      extrapolate: 'clamp',
+    });
+  
     return (
       <View style={styles.fullscreenBackdrop}>
-        <Text style={styles.fullscreenInstruction}>swipe RIGHT to DONATE (✓) {"\n"} swipe LEFT to KEEP (✗)</Text>
+        <Text style={styles.fullscreenInstruction}>
+          swipe RIGHT to DONATE (✓) {'\n'} swipe LEFT to KEEP (✗)
+        </Text>
+  
         <View style={styles.swipeLabels}>
           <Animated.Text style={[styles.noLabel, { opacity: noOpacity }]}>✗</Animated.Text>
           <Animated.Text style={[styles.yesLabel, { opacity: yesOpacity }]}>✓</Animated.Text>
         </View>
-        <Animated.View style={[styles.fullscreenCard, { transform: [{ translateX: position.x }] }]} {...panResponder.panHandlers}>
+  
+        <Animated.View
+          key={current.uri}
+          {...panResponder.panHandlers}
+          style={[
+            styles.fullscreenCard,
+            {
+              transform: [
+                { translateX: position.x },
+                { rotate },
+              ],
+            },
+          ]}
+        >
           <Image source={{ uri: current.uri }} style={styles.fullscreenImage} />
           <View style={styles.itemCounter}>
             <Text style={styles.counterText}>
-              {cardIndex+1}/{discardItems.length}
+              {cardIndex + 1}/{discardItems.length}
             </Text>
           </View>
         </Animated.View>
+  
         <TouchableOpacity onPress={() => setFullscreenActive(false)} style={styles.closeFullscreen}>
           <Text style={styles.resetButtonText}>CLOSE</Text>
         </TouchableOpacity>
@@ -232,7 +269,10 @@ const WardrobeScreen = ({ navigation }) => {
             <Text style={styles.emptyText}>No matches yet </Text>
           )}
           {discardItems.length > 0 && (
-            <TouchableOpacity onPress={() => setFullscreenActive(true)} style={styles.fullscreenIcon}>
+            <TouchableOpacity onPress={() => {
+              setCardIndex(0);
+              setFullscreenActive(true);
+            }} style={styles.fullscreenIcon}>
               <MaterialIcons name="fullscreen" size={24} color="#e3e3e3" />
             </TouchableOpacity>
           )}
