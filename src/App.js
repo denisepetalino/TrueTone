@@ -9,6 +9,7 @@ import QuizScreen from './screens/QuizScreen';
 import UploadScreen from './screens/UploadScreen';
 import WardrobeScreen from './screens/WardrobeScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import NearbyCharitiesScreen from './screens/NearbyCharities';
 
 const Stack = createNativeStackNavigator();
 
@@ -40,6 +41,7 @@ export default function App() {
         <Stack.Screen name="Wardrobe" component={WardrobeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="AnalyseMe" component={AnalyseMeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Quiz" component={QuizScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="NearbyCharities" component={NearbyCharitiesScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

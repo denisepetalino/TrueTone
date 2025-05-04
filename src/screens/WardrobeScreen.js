@@ -175,6 +175,9 @@ const WardrobeScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <Image source={require('../assets/images/truetone-logo.png')} style={styles.logo} />
+      <TouchableOpacity style={styles.resetButton} onPress={() => navigation.navigate('NearbyCharities')}>
+        <Text style={styles.resetButtonText}>View Nearby Charities</Text>
+      </TouchableOpacity>
 
       <View style={styles.halfContainer}>
         <View style={styles.sectionKeep}>
