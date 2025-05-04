@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, SafeAreaView } from 'react-native';
 import Navbar from '../components/Navbar';
+import Animated, {BounceIn} from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
 
@@ -10,12 +11,16 @@ const AnalyseMeScreen = ({ navigation }) => {
       <Image source={require('../assets/images/truetone-logo.png')} style={styles.logo} />
       <View style={styles.box}>
         <Image source={require('../assets/images/star.png')} style={styles.star} />
-        <TouchableOpacity 
-          style={styles.button} 
-          onPress={() => navigation.navigate('Quiz')}
-        >
-          <Text style={styles.buttonText}>ANALYSE ME!</Text>
-        </TouchableOpacity>
+
+        <Animated.View entering={BounceIn}>
+          <TouchableOpacity 
+            style={styles.button} 
+            onPress={() => navigation.navigate('Quiz')}
+          >
+            <Text style={styles.buttonText}>ANALYSE ME!</Text>
+          </TouchableOpacity>
+        </Animated.View>
+
         <Text style={styles.subtext}>take this quick and easy quiz to discover YOUR personal seasonal colour analysis</Text>
       </View>
       <SafeAreaView style = {styles.navbarWrapper}>

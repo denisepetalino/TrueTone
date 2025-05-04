@@ -14,6 +14,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Navbar from '../components/Navbar';
+import Animated, { BounceIn } from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
 
@@ -139,7 +140,9 @@ const UploadScreen = () => {
 
         <View style={styles.box}>
           <Image source={require('../assets/images/hellokittycamera.png')} style={styles.camera} />
-          <Text style={styles.headingtext}>UPLOAD HERE!</Text>
+          <Animated.View entering={BounceIn}>
+            <Text style={styles.headingtext}>UPLOAD HERE!</Text>
+          </Animated.View>
           <Text style={styles.subtext}>
             1. use bright lighting{'\n'}
             2. avoid harsh shadows{'\n'}
