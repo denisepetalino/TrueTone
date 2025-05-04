@@ -175,9 +175,6 @@ const WardrobeScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <Image source={require('../assets/images/truetone-logo.png')} style={styles.logo} />
-      <TouchableOpacity style={styles.resetButton} onPress={() => navigation.navigate('NearbyCharities')}>
-        <Text style={styles.resetButtonText}>View Nearby Charities</Text>
-      </TouchableOpacity>
 
       <View style={styles.halfContainer}>
         <View style={styles.sectionKeep}>
@@ -220,9 +217,15 @@ const WardrobeScreen = ({ navigation }) => {
         </View>
       </View>
 
-      <View style={styles.resetWrapper}>
+      <View>
         <TouchableOpacity style={styles.resetButton} onPress={() => setShowResetModal(true)}>
           <Text style={styles.resetButtonText}>RESET WARDROBE</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.nearbyWrapper}>
+        <TouchableOpacity style={styles.resetButton} onPress={() => navigation.navigate('NearbyCharities')}>
+          <Text style={styles.resetButtonText}>NEARBY CHARITIES</Text>
         </TouchableOpacity>
       </View>
 
@@ -408,22 +411,21 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 2,
   },
-  resetWrapper: {
-    marginBottom: 60,
-  },
   resetButton: {
     backgroundColor: '#DB7C87',
     paddingVertical: 10,
     paddingHorizontal: 25,
     borderRadius: 20,
-    marginTop: 15,
-    marginBottom: 25,
+    marginTop: 5,
   },
   resetButtonText: {
     color: 'white',
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: 'bold',
     fontFamily: 'HammersmithOne',
+  },
+  nearbyWrapper: {
+    marginBottom: 80,
   },
   emptyText: {
     fontSize: 16,

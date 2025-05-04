@@ -31,7 +31,6 @@ const NearbyCharitiesScreen = () => {
         `https://api.geoapify.com/v2/places?categories=office.charity&filter=circle:${longitude},${latitude},5000&bias=proximity:${longitude},${latitude}&limit=10&apiKey=ddfd6258ff2e4ab9848d1d59af84ae4b`
       );
       const data = await response.json();
-      console.log(JSON.stringify(data.features, null,2));
 
       if (Array.isArray(data.features)) {
         setCharities(data.features);
