@@ -67,7 +67,7 @@ const WardrobeScreen = ({ navigation }) => {
     );
   };
 
-  const isColorClose = (itemColor, paletteColors, threshold = 60) => {
+  const isColorClose = (itemColor, paletteColors, threshold = 50) => {
     const rgb1 = hexToRgb(itemColor);
     return paletteColors.some(palColor => {
       const rgb2 = hexToRgb(palColor);

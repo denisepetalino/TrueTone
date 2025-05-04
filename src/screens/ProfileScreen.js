@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FCE4EC',
   },
   logo: {
-    width: width * 1.1,
+    width: width * 1,
     height: height * 0.17,
     resizeMode: 'contain',
     marginBottom: 10,

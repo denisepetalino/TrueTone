@@ -35,7 +35,14 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Profile">
+      <Stack.Navigator
+      initialRouteName="Profile"
+      screenOptions={{
+        headerShown: false,
+        animation: 'fade',
+        animationDuration: 300,
+      }}
+      >
         <Stack.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Upload" component={UploadScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Wardrobe" component={WardrobeScreen} options={{ headerShown: false }} />

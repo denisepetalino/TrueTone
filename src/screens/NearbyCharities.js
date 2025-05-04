@@ -30,8 +30,6 @@ const NearbyCharitiesScreen = () => {
   const route = useRoute();
   const donatedItems = route?.params?.donatedItems || [];
 
-  console.log('RECEIVED DONATEDITEMS:', donatedItems);
-
   const fetchNearbyCharities = async (latitude, longitude) => {
     try {
       setLoading(true);
