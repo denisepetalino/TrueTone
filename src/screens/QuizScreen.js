@@ -7,10 +7,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const { width } = Dimensions.get('window');
 
 const profiles = [
-  'Light Spring', 'Warm Spring', 'Bright Spring',
+  'Light Spring', 'Warm Spring', 'Clear Spring',
   'Light Summer', 'Cool Summer', 'Soft Summer',
   'Warm Autumn', 'Deep Autumn', 'Soft Autumn',
-  'Cool Winter', 'Deep Winter', 'Bright Winter'
+  'Cool Winter', 'Deep Winter', 'Clear Winter'
 ];
 
 const questions = [
@@ -18,7 +18,7 @@ const questions = [
     id: 1,
     question: 'Which jewellery flatters your skin tone most?',
     options: [
-      { text: 'Silver, I look fresh and clear', scores: { 'Cool Summer': 2, 'Cool Winter': 2, 'Bright Winter': 1 } },
+      { text: 'Silver, I look fresh and clear', scores: { 'Cool Summer': 2, 'Cool Winter': 2, 'Clear Winter': 1 } },
       { text: 'Gold, I glow in it', scores: { 'Warm Spring': 2, 'Warm Autumn': 2, 'Light Spring': 1 } },
       { text: 'Both, but silver slightly more', scores: { 'Soft Summer': 1, 'Cool Summer': 1, 'Deep Winter': 1 } },
       { text: 'Both, but gold slightly more', scores: { 'Soft Autumn': 1, 'Light Spring': 1, 'Deep Autumn': 1 } },
@@ -39,7 +39,7 @@ const questions = [
     id: 3,
     question: 'How does your skin react to sun exposure?',
     options: [
-      { text: 'Burns quickly, hardly tans', scores: { 'Cool Summer': 2, 'Light Summer': 2, 'Bright Winter': 1 } },
+      { text: 'Burns quickly, hardly tans', scores: { 'Cool Summer': 2, 'Light Summer': 2, 'Clear Winter': 1 } },
       { text: 'Tans easily, rarely burns', scores: { 'Warm Autumn': 2, 'Deep Autumn': 2, 'Warm Spring': 1 } },
       { text: 'Burns then tans gradually', scores: { 'Soft Summer': 1, 'Light Spring': 1, 'Soft Autumn': 1 } },
     ],
@@ -49,7 +49,7 @@ const questions = [
     id: 4,
     question: 'How much contrast is there between your hair, eyes, and skin?',
     options: [
-      { text: 'High: e.g., dark hair and light skin/eyes', scores: { 'Bright Winter': 2, 'Deep Winter': 2, 'Bright Spring': 1 } },
+      { text: 'High: e.g., dark hair and light skin/eyes', scores: { 'Clear Winter': 2, 'Deep Winter': 2, 'Clear Spring': 1 } },
       { text: 'Medium: some contrast but not sharp', scores: { 'Cool Summer': 1, 'Warm Autumn': 1, 'Deep Autumn': 1 } },
       { text: 'Low: everything blends softly', scores: { 'Soft Autumn': 2, 'Soft Summer': 2 } },
     ],
@@ -60,7 +60,7 @@ const questions = [
     question: 'Pick the combination closest to your natural hair and eye colour:',
     options: [
       { text: 'Light hair + light eyes', scores: { 'Light Spring': 2, 'Light Summer': 2 } },
-      { text: 'Dark hair + light eyes', scores: { 'Bright Winter': 2, 'Bright Spring': 2 } },
+      { text: 'Dark hair + light eyes', scores: { 'Clear Winter': 2, 'Clear Spring': 2 } },
       { text: 'Dark hair + dark eyes', scores: { 'Deep Autumn': 2, 'Deep Winter': 2 } },
       { text: 'Light hair + dark eyes', scores: { 'Warm Spring': 1, 'Soft Autumn': 1 } },
     ],
@@ -70,7 +70,7 @@ const questions = [
     id: 6,
     question: 'Do bold, high-contrast outfits suit you?',
     options: [
-      { text: 'Yes, I thrive in bold colours', scores: { 'Bright Winter': 2, 'Bright Spring': 2 } },
+      { text: 'Yes, I thrive in bold colours', scores: { 'Clear Winter': 2, 'Clear Spring': 2 } },
       { text: 'Sometimes, but soft blends look better', scores: { 'Soft Summer': 2, 'Soft Autumn': 2 } },
       { text: 'No, they overwhelm me', scores: { 'Light Spring': 1, 'Light Summer': 1 } },
     ],
@@ -80,7 +80,7 @@ const questions = [
     id: 7,
     question: 'How do vivid, high-saturation colours look on you?',
     options: [
-      { text: 'They make me glow!', scores: { 'Bright Spring': 2, 'Bright Winter': 2 } },
+      { text: 'They make me glow!', scores: { 'Clear Spring': 2, 'Clear Winter': 2 } },
       { text: 'A bit too loud, I prefer toned-down colours', scores: { 'Soft Summer': 2, 'Soft Autumn': 2 } },
       { text: 'I prefer richer, deeper tones', scores: { 'Deep Autumn': 2, 'Deep Winter': 2 } },
       { text: 'I like light, soft colours more', scores: { 'Light Summer': 1, 'Light Spring': 1 } },
@@ -91,7 +91,7 @@ const questions = [
     id: 8,
     question: 'How do dusty shades (like sage or dusty rose) affect your skin?',
     options: [
-      { text: 'They wash me out or dull my features', scores: { 'Bright Spring': 2, 'Bright Winter': 2 } },
+      { text: 'They wash me out or dull my features', scores: { 'Clear Spring': 2, 'Clear Winter': 2 } },
       { text: 'They harmonise beautifully with my tone', scores: { 'Soft Summer': 2, 'Soft Autumn': 2 } },
       { text: 'They’re okay but not my best', scores: { 'Cool Summer': 1, 'Warm Autumn': 1 } },
       { text: 'They brighten me up', scores: { 'Light Spring': 1, 'Light Summer': 1 } },
@@ -105,7 +105,7 @@ const questions = [
       { text: 'Make my features pop, I look sharp', scores: { 'Deep Winter': 2, 'Deep Autumn': 2 } },
       { text: 'Too strong, I prefer softer midtones', scores: { 'Soft Summer': 2, 'Soft Autumn': 2 } },
       { text: 'They’re overpowering; I go for light colours', scores: { 'Light Spring': 1, 'Light Summer': 1 } },
-      { text: 'They’re okay but vibrant brights suit me better', scores: { 'Bright Spring': 2, 'Bright Winter': 2 } },
+      { text: 'They’re okay but vibrant brights suit me better', scores: { 'Clear Spring': 2, 'Clear Winter': 2 } },
     ],
     image: require('../assets/images/quiz/blackburgundy.png'),
   },
@@ -114,7 +114,7 @@ const questions = [
     question: 'What effect do pastel colours (like baby pink or sky blue) have on you?',
     options: [
       { text: 'They flatter me and make my skin glow', scores: { 'Light Spring': 2, 'Light Summer': 2 } },
-      { text: 'They feel bland, I need more intensity', scores: { 'Bright Winter': 2, 'Deep Autumn': 1 } },
+      { text: 'They feel bland, I need more intensity', scores: { 'Clear Winter': 2, 'Deep Autumn': 1 } },
       { text: 'They feel gentle and calm, I like them', scores: { 'Soft Summer': 1, 'Soft Autumn': 1 } },
       { text: 'They’re not great, I prefer richer tones', scores: { 'Deep Winter': 1, 'Warm Autumn': 1 } },
     ],
@@ -124,7 +124,7 @@ const questions = [
     id: 11,
     question: 'Which pattern type are you drawn to most?',
     options: [
-      { text: 'Bold, high-contrast (e.g., stripes, graphic prints)', scores: { 'Bright Winter': 2, 'Bright Spring': 2 } },
+      { text: 'Bold, high-contrast (e.g., stripes, graphic prints)', scores: { 'Clear Winter': 2, 'Clear Spring': 2 } },
       { text: 'Soft, watercolour blends', scores: { 'Soft Summer': 2, 'Soft Autumn': 2 } },
       { text: 'Rich, deep jewel-tone prints (e.g., paisley)', scores: { 'Deep Autumn': 2, 'Deep Winter': 2 } },
       { text: 'Light and delicate florals', scores: { 'Light Summer': 2, 'Light Spring': 2 } },
