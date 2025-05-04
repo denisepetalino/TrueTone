@@ -4,7 +4,7 @@
 
 TrueTone is a mobile app designed to bring seasonal colour analysis to your fingertips, no expensive consultations and no need to fly to Korea! This app is aimed for Gen Z fashion lovers to help make wardrobe choices by identifying which colours truly complement their natural tones.
 
-## This project is built using React Native (Expo), ensuring a smooth experience on both iOS and Android devices. It combines UX research, user surveys, and interviews to ensure that the app looks and feels right for the people who will actually use it!
+This project is built using React Native (Expo), ensuring a smooth experience on both iOS and Android devices. It combines UX research, user surveys, and interviews to ensure that the app looks and feels right for the people who will actually use it!
 
 ## 📁 Contents of This Repository
 
