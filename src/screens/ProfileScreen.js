@@ -187,7 +187,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     alignItems: 'center',
-    paddingBottom: 120,
   },
   resultContainer: {
     backgroundColor: '#EFB0B7',
@@ -197,7 +196,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     minHeight: height * 0.8,
-    paddingBottom: 100,
+    paddingBottom: 60,
   },
   title: {
     fontSize: 25,
