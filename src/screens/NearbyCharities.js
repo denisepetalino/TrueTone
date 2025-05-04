@@ -10,11 +10,13 @@ import {
   TouchableOpacity,
   Platform,
   ActivityIndicator,
+  FlatList
 } from 'react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Linking } from 'react-native';
 import Navbar from '../components/Navbar';
+import { useRoute } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window');
 
@@ -24,6 +26,11 @@ const NearbyCharitiesScreen = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCharityIndex, setSelectedCharityIndex] = useState(null);
   const [mapRegion, setMapRegion] = useState(null);
+
+  const route = useRoute();
+  const donatedItems = route?.params?.donatedItems || [];
+
+  console.log('RECEIVED DONATEDITEMS:', donatedItems);
 
   const fetchNearbyCharities = async (latitude, longitude) => {
     try {
@@ -101,6 +108,19 @@ const NearbyCharitiesScreen = () => {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Image source={require('../assets/images/truetone-logo.png')} style={styles.logo} />
+
+        <View style={styles.donationPreviewSection}>
+          <Text style={styles.sectionTitle}>You're Donating:</Text>
+          <FlatList
+            horizontal
+            data={donatedItems}
+            keyExtractor={(item, index) => item.uri + index}
+            renderItem={({ item }) => (
+              <Image source={{ uri: item.uri }} style={styles.donatedImage} />
+            )}
+            showsHorizontalScrollIndicator={false}
+          />
+        </View>
 
         <View style={styles.mapContainer}>
           {location && mapRegion && (
@@ -199,7 +219,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   mapContainer: {
-    height: 250,
+    height: 350,
     marginHorizontal: 20,
     marginBottom: 15,
     borderRadius: 20,
@@ -273,6 +293,33 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+  },
+  donationPreviewSection: {
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    backgroundColor: '#FFF4F5',
+    alignItems: 'center',
+    alignSelf: 'center',
+    width: '90%',
+    borderRadius: 15,
+    borderColor: '#DB7C87',
+    borderWidth: 3,
+    margin: 5,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    color: '#5A4E4C',
+    fontFamily: 'HammersmithOne',
+  },
+  donatedImage: {
+    width: 60,
+    height: 80,
+    borderRadius: 8,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#DB7C87',
   },
 });
 

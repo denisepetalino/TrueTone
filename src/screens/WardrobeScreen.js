@@ -31,6 +31,7 @@ const WardrobeScreen = ({ navigation }) => {
   const [fullscreenActive, setFullscreenActive] = useState(false);
   const [cardIndex, setCardIndex] = useState(0);
   const [donatedItems, setDonatedItems] = useState([]);
+  const [finalDonatedItems, setFinalDonatedItems] = useState([]);
   const currentItemRef = useRef(null);
   const bufferedKeeps = useRef([]);
   const bufferedDonations = useRef([]);
@@ -42,6 +43,10 @@ const WardrobeScreen = ({ navigation }) => {
       console.log('🧷 currentItemRef set from useEffect:', currentItemRef.current);
     }
   }, [swipeQueue]);
+
+  useEffect (() => {
+    console.log('Donated items after swipe:', donatedItems);
+  }, [donatedItems]);
 
   const position = useRef(new Animated.ValueXY()).current;
 
@@ -183,31 +188,38 @@ const WardrobeScreen = ({ navigation }) => {
       console.log('✅ Queue empty. Auto-closing and committing...');
       commitSwipeResults();
       setFullscreenActive(false);
+      setShowDonationModal(true);
     }
   };
 
   const commitSwipeResults = async () => {
-    console.log('💾 Committing results...');
-    const raw = await AsyncStorage.getItem('wardrobeItems');
-    const wardrobeItems = raw ? JSON.parse(raw) : [];
+    const donations = [...bufferedDonations.current];
+    const keeps = [...bufferedKeeps.current];
   
-    const updatedItems = wardrobeItems.map(item => {
-      if (bufferedDonations.current.some(d => d.uri === item.uri)) {
-        return { ...item, status: 'donated' };
-      }
-      if (bufferedKeeps.current.some(k => k.uri === item.uri)) {
-        return { ...item, status: 'keep' };
-      }
+    const wardrobeRaw = await AsyncStorage.getItem('wardrobeItems');
+    const wardrobeItems = wardrobeRaw ? JSON.parse(wardrobeRaw) : [];
+  
+    const updatedWardrobe = wardrobeItems.map(item => {
+      if (donations.some(d => d.uri === item.uri)) return { ...item, status: 'donated' };
+      if (keeps.some(k => k.uri === item.uri)) return { ...item, status: 'keep' };
       return item;
     });
   
-    await AsyncStorage.setItem('wardrobeItems', JSON.stringify(updatedItems));
+    await AsyncStorage.setItem('wardrobeItems', JSON.stringify(updatedWardrobe));
+  
+    setKeepItems(prev => [...prev, ...keeps]);
+    setDonatedItems(prev => [...prev, ...donations]);
+    setDiscardItems(prev =>
+      prev.filter(
+        item =>
+          !keeps.some(k => k.uri === item.uri) &&
+          !donations.some(d => d.uri === item.uri)
+      )
+    );
+    setFinalDonatedItems(donations);
   
     bufferedKeeps.current = [];
     bufferedDonations.current = [];
-  
-    await loadData();
-    setShowDonationModal(true);
   };
 
   const renderFullscreen = () => {
@@ -425,7 +437,7 @@ const WardrobeScreen = ({ navigation }) => {
             style={styles.modalButton}
             onPress={() => {
               setShowDonationModal(false);
-              navigation.navigate('NearbyCharities');
+              navigation.navigate('NearbyCharities', {donatedItems: finalDonatedItems});
             }}
           >
             <Text style={styles.modalButtonText}>Yes, show me</Text>
