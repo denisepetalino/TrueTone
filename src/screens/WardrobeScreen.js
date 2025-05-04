@@ -27,6 +27,7 @@ const WardrobeScreen = ({ navigation }) => {
   const [swipeQueue, setSwipeQueue] = useState([]);
   const [showLockModal, setShowLockModal] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showDonationModal, setShowDonationModal] = useState(false);
   const [fullscreenActive, setFullscreenActive] = useState(false);
   const [cardIndex, setCardIndex] = useState(0);
   const [donatedItems, setDonatedItems] = useState([]);
@@ -73,16 +74,30 @@ const WardrobeScreen = ({ navigation }) => {
     const profileKey = await AsyncStorage.getItem('seasonalColorProfile');
     const wardrobeRaw = await AsyncStorage.getItem('wardrobeItems');
     const wardrobeItems = wardrobeRaw ? JSON.parse(wardrobeRaw) : [];
-    if (!profileKey || wardrobeItems.length === 0) {
+  
+    if (!profileKey) {
       setShowLockModal(true);
       return;
     }
+  
     const palette = profileData[profileKey]?.palette || [];
     const keep = [], discard = [];
+  
     wardrobeItems.forEach(item => {
-      if (isColorClose(item.dominantColor, palette)) keep.push(item);
-      else discard.push(item);
+      if (item.status === 'donated') return;
+      if (item.status === 'keep' || isColorClose(item.dominantColor, palette)) {
+        keep.push(item);
+      } else {
+        discard.push(item);
+      }
     });
+  
+    // Only lock if there are no items that are NOT donated
+    if (keep.length === 0 && discard.length === 0) {
+      setShowLockModal(true);
+      return;
+    }
+  
     setKeepItems(keep);
     setDiscardItems(discard);
   };
@@ -93,7 +108,6 @@ const WardrobeScreen = ({ navigation }) => {
     setDiscardItems([]);
     setCardIndex(0);
     setDonatedItems([]);
-    setRescuedItems([]);
     setShowResetModal(false);
     await loadData();
   };
@@ -172,24 +186,28 @@ const WardrobeScreen = ({ navigation }) => {
     }
   };
 
-  const commitSwipeResults = () => {
+  const commitSwipeResults = async () => {
     console.log('💾 Committing results...');
-    console.log('➕ Final keeps:', bufferedKeeps.current);
-    console.log('➕ Final donations:', bufferedDonations.current);
-    console.log('📤 Updating discardItems...');
+    const raw = await AsyncStorage.getItem('wardrobeItems');
+    const wardrobeItems = raw ? JSON.parse(raw) : [];
   
-    const updatedDiscard = discardItems.filter(
-      item =>
-        !bufferedKeeps.current.some(k => k.uri === item.uri) &&
-        !bufferedDonations.current.some(d => d.uri === item.uri)
-    );
+    const updatedItems = wardrobeItems.map(item => {
+      if (bufferedDonations.current.some(d => d.uri === item.uri)) {
+        return { ...item, status: 'donated' };
+      }
+      if (bufferedKeeps.current.some(k => k.uri === item.uri)) {
+        return { ...item, status: 'keep' };
+      }
+      return item;
+    });
   
-    setKeepItems(prev => [...prev, ...bufferedKeeps.current]);
-    setDonatedItems(prev => [...prev, ...bufferedDonations.current]);
-    setDiscardItems(updatedDiscard);
+    await AsyncStorage.setItem('wardrobeItems', JSON.stringify(updatedItems));
   
     bufferedKeeps.current = [];
     bufferedDonations.current = [];
+  
+    await loadData();
+    setShowDonationModal(true);
   };
 
   const renderFullscreen = () => {
@@ -325,12 +343,6 @@ const WardrobeScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.nearbyWrapper}>
-        <TouchableOpacity style={styles.resetButton} onPress={() => navigation.navigate('NearbyCharities')}>
-          <Text style={styles.resetButtonText}>NEARBY CHARITIES</Text>
-        </TouchableOpacity>
-      </View>
-
       <SafeAreaView style={styles.navbarWrapper}>
         <Navbar />
       </SafeAreaView>
@@ -398,6 +410,35 @@ const WardrobeScreen = ({ navigation }) => {
           </View>
         </View>
       </Modal>
+      
+      <Modal
+      visible={showDonationModal}
+      transparent
+      animationType="fade"
+      onRequestClose={() => setShowDonationModal(false)}
+    >
+      <View style={styles.modalBackdrop}>
+        <View style={styles.modalBox}>
+          <Text style={styles.modalTitle}>Items Ready to Donate!</Text>
+          <Text style={styles.modalText}>Would you like to see nearby donation points?</Text>
+          <TouchableOpacity
+            style={styles.modalButton}
+            onPress={() => {
+              setShowDonationModal(false);
+              navigation.navigate('NearbyCharities');
+            }}
+          >
+            <Text style={styles.modalButtonText}>Yes, show me</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.modalButton}
+            onPress={() => setShowDonationModal(false)}
+          >
+            <Text style={styles.modalButtonText}>Maybe later</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
     </SafeAreaView>
   );
 };
@@ -519,15 +560,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     borderRadius: 20,
     marginTop: 5,
+    marginBottom: 80,
   },
   resetButtonText: {
     color: 'white',
-    fontSize: 15,
+    fontSize: 20,
     fontWeight: 'bold',
     fontFamily: 'HammersmithOne',
-  },
-  nearbyWrapper: {
-    marginBottom: 80,
   },
   emptyText: {
     fontSize: 16,
