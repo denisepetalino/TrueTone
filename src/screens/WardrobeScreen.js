@@ -24,17 +24,17 @@ const SWIPE_THRESHOLD = 30;
 const WardrobeScreen = ({ navigation }) => {
   const [keepItems, setKeepItems] = useState([]);
   const [discardItems, setDiscardItems] = useState([]);
+  const [swipeQueue, setSwipeQueue] = useState([]);
   const [showLockModal, setShowLockModal] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
   const [fullscreenActive, setFullscreenActive] = useState(false);
   const [cardIndex, setCardIndex] = useState(0);
   const [donatedItems, setDonatedItems] = useState([]);
-  const [rescuedItems, setRescuedItems] = useState([]);
-  const [showDonationModal, setShowDonationModal] = useState(false);
-  const [finalDonatedItems, setFinalDonatedItems] = useState([]);
+  const currentItemRef = useRef(null);
+  const bufferedKeeps = useRef([]);
+  const bufferedDonations = useRef([]);
 
   const position = useRef(new Animated.ValueXY()).current;
-  const currentItemRef = useRef(null);
 
   const hexToRgb = hex => {
     const clean = hex.replace('#', '');
@@ -129,35 +129,61 @@ const WardrobeScreen = ({ navigation }) => {
   ).current;
 
   const handleSwipe = (direction, item) => {
-    if (!item){
-      console.log('No item passed to handleSwipe.');
+    if (!item) {
+      console.log('⚠️ No item passed to handleSwipe.');
       return;
     }
-    console.log('🌀 SWIPE TRIGGERED:', direction);
-    console.log('🌀 CURRENT ITEM:', item);
-
+  
+    console.log('🌀 SWIPE:', direction);
+    console.log('📌 Current item:', item);
+    console.log('📊 swipeQueue before:', swipeQueue);
+  
     Animated.timing(position, {
       toValue: { x: direction === 'right' ? width : -width, y: 0 },
       duration: 250,
       useNativeDriver: true,
     }).start(() => {
-      const updatedDiscard = discardItems.filter(i => i.uri !== item.uri);
-
+      const updatedQueue = swipeQueue.slice(1);
+  
       if (direction === 'right') {
-        setDonatedItems(prev => [...prev, item]);
+        bufferedDonations.current.push(item);
       } else {
-        setKeepItems(prev => [...prev, item]);
+        bufferedKeeps.current.push(item);
       }
-
-      console.log('📤 UPDATED DISCARD:', updatedDiscard);
-      setDiscardItems(updatedDiscard);
+  
+      console.log('🧹 swipeQueue after:', updatedQueue);
+      console.log('➕ bufferedKeeps:', bufferedKeeps.current);
+      console.log('➕ bufferedDonations:', bufferedDonations.current);
+  
+      setSwipeQueue(updatedQueue);
       position.setValue({ x: 0, y: 0 });
-
-      if (updatedDiscard.length === 0) {
-        console.log('✅ No more items. Closing fullscreen.');
+  
+      if (updatedQueue.length === 0) {
+        console.log('✅ Queue empty. Auto-closing and committing...');
+        commitSwipeResults();
         setFullscreenActive(false);
       }
     });
+  };
+
+  const commitSwipeResults = () => {
+    console.log('💾 Committing results...');
+    console.log('➕ Final keeps:', bufferedKeeps.current);
+    console.log('➕ Final donations:', bufferedDonations.current);
+    console.log('📤 Updating discardItems...');
+  
+    const updatedDiscard = discardItems.filter(
+      item =>
+        !bufferedKeeps.current.some(k => k.uri === item.uri) &&
+        !bufferedDonations.current.some(d => d.uri === item.uri)
+    );
+  
+    setKeepItems(prev => [...prev, ...bufferedKeeps.current]);
+    setDonatedItems(prev => [...prev, ...bufferedDonations.current]);
+    setDiscardItems(updatedDiscard);
+  
+    bufferedKeeps.current = [];
+    bufferedDonations.current = [];
   };
 
   const renderFullscreen = () => {
@@ -168,11 +194,11 @@ const WardrobeScreen = ({ navigation }) => {
 
     console.log('🧮 Current index:', cardIndex, 'Items:', discardItems.length);
   
-    const current = discardItems[0];
+    const current = swipeQueue[0];
+    console.log('🖼️ RENDERING ITEM IN FULLSCREEN:', current);
     currentItemRef.current = current;
     if (!current) return null;
   
-    console.log('🖼️ RENDERING ITEM IN FULLSCREEN:', current);
   
     const yesOpacity = position.x.interpolate({
       inputRange: [0, SWIPE_THRESHOLD],
@@ -224,7 +250,11 @@ const WardrobeScreen = ({ navigation }) => {
           </View>
         </Animated.View>
   
-        <TouchableOpacity onPress={() => setFullscreenActive(false)} style={styles.closeFullscreen}>
+        <TouchableOpacity onPress={() => {
+          console.log('FULLSCREEN MANUALLY CLOSED.');
+          commitSwipeResults();
+          setFullscreenActive(false)
+        }} style={styles.closeFullscreen}>
           <Text style={styles.resetButtonText}>CLOSE</Text>
         </TouchableOpacity>
       </View>
@@ -270,7 +300,11 @@ const WardrobeScreen = ({ navigation }) => {
           )}
           {discardItems.length > 0 && (
             <TouchableOpacity onPress={() => {
-              setCardIndex(0);
+              console.log('OPENING FULLSCREEN');
+              console.log('swipeQueue:', discardItems);
+              setSwipeQueue(discardItems);
+              bufferedKeeps.current = [];
+              bufferedDonations.current = [];
               setFullscreenActive(true);
             }} style={styles.fullscreenIcon}>
               <MaterialIcons name="fullscreen" size={24} color="#e3e3e3" />
