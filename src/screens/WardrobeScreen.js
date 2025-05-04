@@ -220,6 +220,8 @@ const WardrobeScreen = ({ navigation }) => {
   
     bufferedKeeps.current = [];
     bufferedDonations.current = [];
+
+    await loadData();
   };
 
   const renderFullscreen = () => {
