@@ -86,7 +86,7 @@ The application uses the following key dependencies:
   [https://www.figma.com/design/d0mJGFzYhQHDAqUuvBAmqL/TrueTone](https://www.figma.com/design/d0mJGFzYhQHDAqUuvBAmqL/TrueTone)
 
 - **Google Forms Survey** (Survey):  
-  [[https://forms.gle/obC3aV2Zp3NFwZo9A](https://forms.gle/i4uWRQ2f4NQdc5v79)]([https://forms.gle/obC3aV2Zp3NFwZo9A](https://forms.gle/i4uWRQ2f4NQdc5v79))
+  [https://forms.gle/obC3aV2Zp3NFwZo9A](https://forms.gle/i4uWRQ2f4NQdc5v79)
 
 - **Google Forms Survey** (User Feedback):  
   [https://forms.gle/obC3aV2Zp3NFwZo9A](https://forms.gle/obC3aV2Zp3NFwZo9A)
